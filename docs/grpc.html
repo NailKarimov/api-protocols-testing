@@ -1,0 +1,488 @@
+<!doctype html>
+<html lang="en" data-default-lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>gRPC на сервисе котировок</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@112,700;112,800&family=Atkinson+Hyperlegible:wght@400;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+/* Layout: a trading-desk wire. Each kind of call is a lane between client and server with message pulses; then
+   status codes, a deadline you drag, a stream with seq numbers, the .proto contract under edit, planted bugs. */
+:root {
+  --bg: #f1f4f3; --surface: #ffffff; --sunken: #e2e8e6; --ink: #0f1a17; --muted: #55635f; --line: #cdd7d4;
+  --accent: #0b7a6e; --accent-soft: #d6efeb;
+  --client: #2f5bd3; --server: #0b7a6e;
+  --ok: #18794e; --ok-soft: #d9f2e5; --bad: #b42318; --bad-soft: #fbe2df; --warn: #a15c00; --warn-soft: #fbecd2;
+  --font-display: 'Archivo', 'Atkinson Hyperlegible', system-ui, sans-serif;
+  --font-body: 'Atkinson Hyperlegible', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-mono: 'IBM Plex Mono', ui-monospace, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0b1210; --surface: #121c19; --sunken: #192522; --ink: #e6efec; --muted: #9db0aa; --line: #273733;
+    --accent: #4fd1bf; --accent-soft: #123a34; --client: #8aa8ff; --server: #4fd1bf;
+    --ok: #5fd394; --ok-soft: #12321f; --bad: #ff8a7d; --bad-soft: #3d1714; --warn: #f3b562; --warn-soft: #3a2a10;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0b1210; --surface: #121c19; --sunken: #192522; --ink: #e6efec; --muted: #9db0aa; --line: #273733;
+  --accent: #4fd1bf; --accent-soft: #123a34; --client: #8aa8ff; --server: #4fd1bf;
+  --ok: #5fd394; --ok-soft: #12321f; --bad: #ff8a7d; --bad-soft: #3d1714; --warn: #f3b562; --warn-soft: #3a2a10;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--ink); font: 400 16px/1.6 var(--font-body); margin: 0; }
+body[data-lang="ru"] [lang="en"], body[data-lang="en"] [lang="ru"] { display: none !important; }
+.wrap { max-width: 1080px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 0 64px; }
+h1, h2, h3 { font-family: var(--font-display); font-stretch: 112%; text-wrap: balance; line-height: 1.1; margin: 0; }
+h1 { font-size: clamp(31px, 5vw, 52px); font-weight: 800; }
+h2 { font-size: clamp(22px, 2.9vw, 30px); font-weight: 800; }
+h3 { font-size: 16px; font-weight: 700; }
+p { margin: 0; max-width: 70ch; }
+code, .mono { font-family: var(--font-mono); font-size: 0.86em; }
+a { color: var(--accent); }
+button { font-family: var(--font-body); }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 4px; }
+.eyebrow { font: 500 12px/1 var(--font-mono); letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+.muted { color: var(--muted); }
+header.top { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding-block: 20px; flex-wrap: wrap; }
+.seg { display: inline-flex; border: 1px solid var(--line); border-radius: 999px; overflow: hidden; }
+.seg button { font: 500 13px var(--font-mono); background: transparent; color: var(--muted); border: 0; padding: 6px 14px; cursor: pointer; }
+.seg button[aria-pressed="true"] { background: var(--ink); color: var(--bg); }
+.hero { display: grid; gap: 16px; padding-block: 8px 8px; }
+.hero .lead { font-size: 18px; color: var(--muted); }
+.facts { display: flex; flex-wrap: wrap; gap: 8px 22px; font-size: 14px; color: var(--muted); }
+.facts b { font: 800 22px var(--font-display); color: var(--ink); margin-right: 6px; font-variant-numeric: tabular-nums; }
+section.station { display: grid; gap: 16px; padding-block: 48px 0; }
+section.station > header { display: grid; gap: 8px; }
+.btn { font: 700 14px var(--font-body); background: var(--ink); color: var(--bg); border: 0; border-radius: 8px; padding: 8px 14px; cursor: pointer; }
+.btn.ghost { background: transparent; color: var(--ink); border: 1px solid var(--line); }
+.btn.danger { background: var(--bad); color: var(--surface); }
+.row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+
+/* lanes */
+.lanes { display: grid; gap: 10px; }
+.lane { display: grid; grid-template-columns: minmax(0, 210px) minmax(0, 1fr); gap: 14px; align-items: center; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px; }
+@media (max-width: 720px) { .lane { grid-template-columns: minmax(0, 1fr); } }
+.lane .meta { display: grid; gap: 2px; min-width: 0; }
+.lane .meta b { font: 600 13px var(--font-mono); color: var(--accent); }
+.lane .meta small { color: var(--muted); font-size: 13.5px; }
+.track { position: relative; height: 58px; border-radius: 8px; background: var(--sunken); overflow: hidden; min-width: 0; }
+.track .end { position: absolute; top: 0; bottom: 0; width: 64px; display: grid; place-items: center; font: 600 11px var(--font-mono); color: var(--surface); z-index: 1; }
+.track .end.c { left: 0; background: var(--client); }
+.track .end.s { right: 0; background: var(--server); }
+.track .rail { position: absolute; left: 64px; right: 64px; height: 2px; background: var(--line); }
+.track .rail.up { top: 18px; } .track .rail.down { top: 38px; }
+.pulse { position: absolute; width: 12px; height: 12px; border-radius: 50%; margin-top: -6px; }
+.pulse.req { background: var(--client); top: 19px; }
+.pulse.res { background: var(--server); top: 39px; }
+.lane .ex { grid-column: 1 / -1; font-size: 13.5px; color: var(--muted); }
+.lane .ex code { color: var(--ink); }
+
+/* status table */
+.codes { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 6px; }
+.code { text-align: left; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; cursor: pointer; display: grid; gap: 2px; color: var(--ink); }
+.code b { font: 600 12.5px var(--font-mono); overflow-wrap: anywhere; }
+.code small { font: 400 11.5px var(--font-mono); color: var(--muted); }
+.code[aria-pressed="true"] { border-color: var(--accent); background: var(--accent-soft); }
+.code.used b::after { content: " ●"; color: var(--accent); }
+.note { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px; display: grid; gap: 6px; font-size: 15px; }
+.note code { overflow-wrap: anywhere; }
+
+/* deadline */
+.dl { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 14px; display: grid; gap: 12px; }
+.dl label { display: grid; gap: 4px; font-size: 14px; }
+.dl label span b { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
+.dl input[type=range] { width: 100%; accent-color: var(--accent); }
+.dlbar { position: relative; height: 54px; background: var(--sunken); border-radius: 8px; overflow: hidden; }
+.dlbar .work { position: absolute; left: 0; top: 8px; height: 16px; background: var(--server); border-radius: 0 4px 4px 0; opacity: .85; }
+.dlbar .work.cut { background: repeating-linear-gradient(45deg, var(--server) 0 6px, transparent 6px 12px); }
+.dlbar .dead { position: absolute; top: 0; bottom: 0; width: 2px; background: var(--bad); }
+.dlbar .dead span { position: absolute; top: 30px; left: 6px; font: 600 11px var(--font-mono); color: var(--bad); white-space: nowrap; }
+.dlbar .dead.flip span { left: auto; right: 6px; }
+.dlbar .lbl { position: absolute; right: 8px; top: 6px; font: 500 11px var(--font-mono); color: var(--muted); }
+.verdict { font: 500 13px/1.55 var(--font-mono); padding: 12px 14px; border-radius: 10px; overflow-wrap: anywhere; display: grid; gap: 4px; }
+.verdict.ok { background: var(--ok-soft); color: var(--ok); } .verdict.bad { background: var(--bad-soft); color: var(--bad); }
+.verdict span { color: var(--ink); font-family: var(--font-body); font-size: 14.5px; }
+
+/* stream */
+.tape { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+@media (max-width: 640px) { .tape { grid-template-columns: minmax(0, 1fr); } }
+.pairlog { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 10px 12px; display: grid; gap: 4px; align-content: start; min-height: 220px; min-width: 0; }
+.pairlog h3 { font-family: var(--font-mono); font-size: 13px; }
+.tick { display: grid; grid-template-columns: 52px minmax(0, 1fr) minmax(0, 1fr); gap: 8px; font: 400 12.5px var(--font-mono); font-variant-numeric: tabular-nums; padding: 2px 6px; border-radius: 4px; }
+.tick.snap { background: var(--accent-soft); }
+.tick.gap { background: var(--bad-soft); color: var(--bad); font-weight: 600; }
+.tick .bid { color: var(--bad); } .tick .ask { color: var(--ok); }
+
+/* proto */
+.edits { display: flex; gap: 6px; flex-wrap: wrap; }
+.edits button { font: 500 13px var(--font-body); border: 1px solid var(--line); background: var(--surface); color: var(--ink); border-radius: 999px; padding: 6px 12px; cursor: pointer; }
+.edits button[aria-pressed="true"] { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+.proto { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; overflow-x: auto; }
+.proto pre { margin: 0; padding: 12px 0; font: 400 13px/1.6 var(--font-mono); }
+.proto .ln { display: block; padding: 0 14px; white-space: pre; }
+.proto .del { background: var(--bad-soft); color: var(--bad); }
+.proto .add { background: var(--ok-soft); color: var(--ok); }
+.proto .cm { color: var(--muted); }
+
+/* mutations */
+.mut { display: grid; gap: 6px; }
+.mrow { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1.4fr) 84px; gap: 12px; align-items: center; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 10px 14px; font-size: 14.5px; }
+@media (max-width: 760px) { .mrow { grid-template-columns: minmax(0, 1fr); gap: 4px; } }
+.mrow code { font-size: 12px; color: var(--muted); }
+.kill { font: 600 12px var(--font-mono); padding: 4px 10px; border-radius: 999px; background: var(--ok-soft); color: var(--ok); text-align: center; justify-self: start; }
+dl.terms { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin: 0; }
+@media (max-width: 760px) { dl.terms { grid-template-columns: minmax(0, 1fr); } }
+dl.terms div { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; }
+dl.terms dt { font: 700 15px var(--font-display); }
+dl.terms dd { margin: 4px 0 0; color: var(--muted); font-size: 14px; }
+.cmd { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px; align-items: center; background: var(--sunken); border-radius: 8px; padding: 6px 6px 6px 12px; }
+.cmd code { overflow-x: auto; white-space: nowrap; }
+.cmd button { font: 500 12px var(--font-body); border: 1px solid var(--line); background: var(--surface); color: var(--ink); border-radius: 6px; padding: 5px 10px; cursor: pointer; }
+footer { padding-top: 40px; color: var(--muted); font-size: 13px; display: flex; gap: 16px; flex-wrap: wrap; }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+</style>
+</head>
+<body data-lang="en">
+<div class="wrap">
+  <header class="top">
+    <span class="eyebrow">api-protocols-testing · proto/quotes/v1</span>
+    <div class="seg" role="group" aria-label="Language">
+      <button type="button" id="lang-ru" data-l="ru" aria-pressed="true">RU</button>
+      <button type="button" id="lang-en" data-l="en" aria-pressed="false">EN</button>
+    </div>
+  </header>
+
+  <section class="hero">
+    <h1 lang="ru">gRPC: один контракт, четыре вида вызова</h1>
+    <h1 lang="en">gRPC: one contract, four kinds of call</h1>
+    <p class="lead" lang="ru">Свой сервис котировок валют. Его API описан в .proto-файле, сообщения идут в двоичном виде, а вызов может быть потоком в любую сторону. Тесты проверяют коды статусов, дедлайны, потоки без пропусков и сам контракт.</p>
+    <p class="lead" lang="en">An FX quote service of our own. Its API is a .proto file, messages travel as binary, and a call can stream either way. The tests check status codes, deadlines, streams without gaps, and the contract itself.</p>
+    <div class="facts">
+      <span><b>47</b><span lang="ru">тестов</span><span lang="en">tests</span></span>
+      <span><b>4</b><span lang="ru">вида RPC</span><span lang="en">kinds of RPC</span></span>
+      <span><b>12/12</b><span lang="ru">внесённых багов пойманы</span><span lang="en">planted bugs caught</span></span>
+      <span><b>8</b><span lang="ru">ломающих правок поймал buf</span><span lang="en">breaking edits caught by buf</span></span>
+    </div>
+  </section>
+
+  <section class="station">
+    <header>
+      <span class="eyebrow">quotes.v1.QuoteService</span>
+      <h2 lang="ru">Четыре вида вызова</h2><h2 lang="en">Four kinds of call</h2>
+      <p class="muted" lang="ru">Синие точки — сообщения клиента, бирюзовые — ответы сервера. В REST есть только первый вид.</p>
+      <p class="muted" lang="en">Blue dots are client messages, teal ones server messages. REST has only the first kind.</p>
+    </header>
+    <div class="row"><button type="button" class="btn" id="play"><span lang="ru">Запустить</span><span lang="en">Play</span></button></div>
+    <div class="lanes" id="lanes"></div>
+  </section>
+
+  <section class="station">
+    <header>
+      <span class="eyebrow">google.rpc.Code</span>
+      <h2 lang="ru">Коды статусов вместо HTTP-кодов</h2><h2 lang="en">Status codes instead of HTTP codes</h2>
+      <p class="muted" lang="ru">В gRPC 17 кодов. Точкой отмечены те, что наш сервис возвращает и тесты проверяют. Нажмите на код.</p>
+      <p class="muted" lang="en">gRPC has 17 codes. Dotted ones are those our service returns and the tests check. Pick a code.</p>
+    </header>
+    <div class="codes" id="codes"></div>
+    <div class="note" id="code-note" aria-live="polite"></div>
+  </section>
+
+  <section class="station">
+    <header>
+      <span class="eyebrow">Deadline</span>
+      <h2 lang="ru">Дедлайн едет вместе с вызовом</h2><h2 lang="en">The deadline travels with the call</h2>
+      <p class="muted" lang="ru">Клиент говорит серверу: «ответ нужен через N мс». Если не успели, клиент получает DEADLINE_EXCEEDED, а хороший сервер бросает работу, которую уже некому вернуть.</p>
+      <p class="muted" lang="en">The client tells the server “I need the answer within N ms”. If it is late, the client gets DEADLINE_EXCEEDED, and a good server drops work nobody will receive.</p>
+    </header>
+    <div class="dl">
+      <label for="d-work"><span><span lang="ru">Работа сервера (delay_ms):</span><span lang="en">Server work (delay_ms):</span> <b id="d-work-v"></b></span><input type="range" id="d-work" min="0" max="2000" step="50" value="2000"></label>
+      <label for="d-dead"><span><span lang="ru">Дедлайн клиента:</span><span lang="en">Client deadline:</span> <b id="d-dead-v"></b></span><input type="range" id="d-dead" min="50" max="2500" step="50" value="200"></label>
+      <div class="dlbar" id="dlbar"></div>
+      <label style="display:flex;gap:8px;align-items:center"><input type="checkbox" id="d-bug"> <span lang="ru">Внести баг: сервер не следит за отменой</span><span lang="en">Plant the bug: the server ignores cancellation</span></label>
+      <div class="verdict" id="d-verdict" aria-live="polite"></div>
+    </div>
+  </section>
+
+  <section class="station">
+    <header>
+      <span class="eyebrow">Subscribe · seq</span>
+      <h2 lang="ru">Поток, который не теряет обновления</h2><h2 lang="en">A stream that loses no update</h2>
+      <p class="muted" lang="ru">Сначала приходит снимок по каждой паре (подсвечен), потом живые цены. seq растёт ровно на 1, поэтому пропуск виден сразу. Включите баг, чтобы сервер терял каждое 10-е обновление.</p>
+      <p class="muted" lang="en">A snapshot of each pair comes first (highlighted), then live prices. seq grows by exactly 1, so a gap shows at once. Turn on the bug to make the server drop every 10th update.</p>
+    </header>
+    <div class="row">
+      <button type="button" class="btn" id="s-run"><span lang="ru">Подписаться</span><span lang="en">Subscribe</span></button>
+      <button type="button" class="btn ghost" id="s-bug" aria-pressed="false"><span lang="ru">Баг: терять каждое 10-е</span><span lang="en">Bug: drop every 10th</span></button>
+    </div>
+    <div class="tape"><div class="pairlog" id="s-a"></div><div class="pairlog" id="s-b"></div></div>
+    <div class="verdict" id="s-verdict" aria-live="polite"></div>
+  </section>
+
+  <section class="station">
+    <header>
+      <span class="eyebrow">buf breaking · contracts/quotes.v1.binpb</span>
+      <h2 lang="ru">Какая правка .proto ломает клиентов</h2><h2 lang="en">Which .proto edit breaks clients</h2>
+      <p class="muted" lang="ru">Каждая кнопка — тест из <code>proto-breaking.spec.ts</code>: правка применяется к копии контракта, buf сравнивает её с утверждённым снимком.</p>
+      <p class="muted" lang="en">Each button is a test from <code>proto-breaking.spec.ts</code>: the edit goes into a copy of the contract and buf compares it with the approved snapshot.</p>
+    </header>
+    <div class="edits" id="edits" role="group" aria-label="Edit"></div>
+    <div class="proto"><pre id="proto"></pre></div>
+    <div class="verdict" id="p-verdict" aria-live="polite"></div>
+  </section>
+
+  <section class="station">
+    <header>
+      <span class="eyebrow" lang="ru">Мутационная проверка</span><span class="eyebrow" lang="en">Mutation check</span>
+      <h2 lang="ru">12 багов, внесённых нарочно</h2><h2 lang="en">12 bugs planted on purpose</h2>
+      <p class="muted" lang="ru">Первый прогон пропустил баг «нет снимка»: при тиках каждые 20 мс живые обновления приходят в том же порядке. Помог тест на «тихом рынке» без тиков.</p>
+      <p class="muted" lang="en">The first run missed “no snapshot”: with a tick every 20 ms live updates arrive in the same order. A test on a quiet market with no ticks closed the gap.</p>
+    </header>
+    <div class="mut" id="mut"></div>
+  </section>
+
+  <section class="station">
+    <header>
+      <span class="eyebrow" lang="ru">Словарь</span><span class="eyebrow" lang="en">Glossary</span>
+      <h2 lang="ru">Слова, которые услышите про gRPC</h2><h2 lang="en">Words you will hear about gRPC</h2>
+    </header>
+    <dl class="terms" id="terms"></dl>
+  </section>
+
+  <section class="station">
+    <header>
+      <span class="eyebrow" lang="ru">Запуск</span><span class="eyebrow" lang="en">Run it</span>
+      <h2 lang="ru">Команды</h2><h2 lang="en">Commands</h2>
+    </header>
+    <div style="display:grid;gap:8px" id="cmds"></div>
+  </section>
+
+  <footer>
+    <a href="https://github.com/NailKarimov/api-protocols-testing">github.com/NailKarimov/api-protocols-testing</a>
+    <a href="https://github.com/NailKarimov/api-protocols-testing/blob/main/docs/grpc.md">docs/grpc.md</a>
+    <a href="https://github.com/NailKarimov/api-protocols-testing/blob/main/proto/quotes/v1/quotes.proto">quotes.proto</a>
+    <a href="https://nailkarimov.github.io/api-protocols-testing/">Allure report</a>
+  </footer>
+</div>
+
+<script>
+const S = { lang: 'ru' };
+const L = (ru, en) => (S.lang === 'ru' ? ru : en);
+const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+/* lanes: [name, kind, requests (times 0..1), responses (times), example] */
+const LANES = [
+  ['GetQuote', ['unary: 1 → 1', 'unary: 1 → 1'], [0.05], [0.55], ['<code>GetQuote{pair:"EURUSD"}</code> → одна котировка. Как обычный REST-запрос.', '<code>GetQuote{pair:"EURUSD"}</code> → one quote. Like a plain REST request.']],
+  ['Subscribe', ['server streaming: 1 → N', 'server streaming: 1 → N'], [0.05], [0.3, 0.42, 0.54, 0.66, 0.78, 0.9], ['Один запрос, потом поток цен. Тест: снимок первым, seq без пропусков, отмена освобождает подписку.', 'One request, then a stream of prices. Test: snapshot first, seq without gaps, cancel frees the subscription.']],
+  ['SubmitOrders', ['client streaming: N → 1', 'client streaming: N → 1'], [0.05, 0.15, 0.25, 0.35, 0.45], [0.8], ['Клиент заливает пачку ордеров потоком, в конце одна сводка: принято, отклонено, сумма.', 'The client uploads a batch of orders as a stream; one summary at the end: accepted, rejected, total.']],
+  ['Trade', ['bidirectional: N ↔ N', 'bidirectional: N ↔ N'], [0.05, 0.3, 0.55], [0.22, 0.47, 0.72], ['Разговор: ордер → исполнение → следующий ордер. Покупка по ask, продажа по bid той котировки, что указал сервер.', 'A conversation: order → fill → next order. Buy at the ask, sell at the bid of the quote the server named.']],
+];
+let lanePos = -1, laneRaf = null;
+function renderLanes() {
+  document.getElementById('lanes').innerHTML = LANES.map((l, i) => `<div class="lane"><div class="meta"><b>rpc ${l[0]}</b><small>${L(...l[1])}</small></div><div class="track" id="tr-${i}"><span class="end c">client</span><span class="rail up"></span><span class="rail down"></span><span class="end s">server</span></div><div class="ex">${L(...l[4])}</div></div>`).join('');
+  drawPulses();
+}
+function drawPulses() {
+  LANES.forEach((l, i) => {
+    const tr = document.getElementById('tr-' + i); if (!tr) return;
+    tr.querySelectorAll('.pulse').forEach((p) => p.remove());
+    const w = tr.clientWidth - 128 - 12;
+    const add = (cls, start, dir) => {
+      const t = lanePos < 0 ? (dir > 0 ? 0.5 : 0.5) : (lanePos - start) / 0.18;
+      if (lanePos >= 0 && (t < 0 || t > 1)) return;
+      const x = dir > 0 ? 64 + t * w : 64 + (1 - t) * w;
+      const d = document.createElement('span'); d.className = 'pulse ' + cls; d.style.left = x + 'px'; tr.appendChild(d);
+    };
+    if (lanePos < 0) { add('req', 0, 1); add('res', 0, -1); return; }
+    l[2].forEach((s) => add('req', s, 1)); l[3].forEach((s) => add('res', s, -1));
+  });
+}
+document.getElementById('play').addEventListener('click', () => {
+  cancelAnimationFrame(laneRaf);
+  if (reduce) { lanePos = -1; drawPulses(); return; }
+  const t0 = performance.now();
+  const step = (t) => { lanePos = (t - t0) / 3200; if (lanePos > 1.1) { lanePos = -1; drawPulses(); return; } drawPulses(); laneRaf = requestAnimationFrame(step); };
+  laneRaf = requestAnimationFrame(step);
+});
+addEventListener('resize', drawPulses);
+
+/* status codes: [name, number, http, used?, ru, en] */
+const CODES = [
+  ['OK', 0, '200', true, 'Успех. Для потока — после последнего сообщения (Subscribe на max_updates).', 'Success. For a stream, after the last message (Subscribe at max_updates).'],
+  ['CANCELLED', 1, '499', true, 'Клиент сам отменил вызов. Тест отменяет Subscribe и проверяет, что сервер снял подписку.', 'The client cancelled. The test cancels Subscribe and checks the server dropped the subscription.'],
+  ['UNKNOWN', 2, '500', false, 'Неизвестная ошибка, обычно исключение без кода.', 'An unknown error, usually an exception without a code.'],
+  ['INVALID_ARGUMENT', 3, '400', true, 'Неверный запрос: пара "eurusd", "EUR/USD", 11 пар, delay_ms 10 001.', 'A bad request: pair "eurusd", "EUR/USD", 11 pairs, delay_ms 10 001.'],
+  ['DEADLINE_EXCEEDED', 4, '504', true, 'Не успели до дедлайна. Тест проверяет и время ответа клиенту, и что сервер бросил работу.', 'Missed the deadline. The test checks the client’s wait and that the server dropped the work.'],
+  ['NOT_FOUND', 5, '404', true, 'Пара корректна по форме, но её нет: "ABCDEF". Отличать от INVALID_ARGUMENT — отдельный внесённый баг.', 'Well-formed but unlisted pair: "ABCDEF". Telling it from INVALID_ARGUMENT is a planted bug of its own.'],
+  ['ALREADY_EXISTS', 6, '409', false, 'Ресурс уже есть.', 'The resource already exists.'],
+  ['PERMISSION_DENIED', 7, '403', false, 'Вызывающий известен, но прав нет.', 'The caller is known but lacks permission.'],
+  ['RESOURCE_EXHAUSTED', 8, '429', true, 'Лимит: запрос больше 64 КиБ или 1 001 ордер в одном потоке.', 'A limit: a request over 64 KiB, or 1 001 orders in one stream.'],
+  ['FAILED_PRECONDITION', 9, '400', false, 'Система не в том состоянии для операции.', 'The system is not in the state the operation needs.'],
+  ['ABORTED', 10, '409', false, 'Конфликт, например при конкурентной записи.', 'A conflict, e.g. a concurrent write.'],
+  ['OUT_OF_RANGE', 11, '400', false, 'За пределами допустимого диапазона.', 'Past the valid range.'],
+  ['UNIMPLEMENTED', 12, '501', true, 'Метода нет. Тест вызывает /quotes.v1.QuoteService/DeleteEverything.', 'No such method. The test calls /quotes.v1.QuoteService/DeleteEverything.'],
+  ['INTERNAL', 13, '500', false, 'Внутренняя ошибка. Наш сервер отдаёт «internal error» без стектрейса.', 'Internal error. Our server says “internal error” without a stack trace.'],
+  ['UNAVAILABLE', 14, '503', false, 'Сервер недоступен: повторить можно.', 'The server is unavailable; a retry may work.'],
+  ['DATA_LOSS', 15, '500', false, 'Потеря данных.', 'Data loss.'],
+  ['UNAUTHENTICATED', 16, '401', true, 'Нет metadata authorization или токен неверный. Проверяется для unary и потоков.', 'No authorization metadata or a wrong token. Checked for unary and streams.'],
+];
+let codeSel = 'DEADLINE_EXCEEDED';
+function renderCodes() {
+  document.getElementById('codes').innerHTML = CODES.map((c) => `<button type="button" class="code${c[3] ? ' used' : ''}" data-c="${c[0]}" aria-pressed="${c[0] === codeSel}"><b>${c[0]}</b><small>${c[1]} · HTTP ≈ ${c[2]}</small></button>`).join('');
+  const c = CODES.find((x) => x[0] === codeSel);
+  document.getElementById('code-note').innerHTML = `<b><code>${c[0]}</code> (${c[1]}) · HTTP ≈ ${c[2]}</b><span>${L(c[4], c[5])}</span>${c[3] ? '' : `<span class="muted">${L('Наш сервис этот код не использует.', 'Our service does not use this code.')}</span>`}`;
+}
+document.getElementById('codes').addEventListener('click', (e) => { const b = e.target.closest('[data-c]'); if (b) { codeSel = b.dataset.c; renderCodes(); } });
+
+/* deadline */
+function renderDl() {
+  const work = +document.getElementById('d-work').value, dead = +document.getElementById('d-dead').value, bug = document.getElementById('d-bug').checked;
+  document.getElementById('d-work-v').textContent = work + ' ms';
+  document.getElementById('d-dead-v').textContent = dead + ' ms';
+  const max = 2500, pct = (v) => (v / max) * 100;
+  const late = work > dead;
+  const shown = late && !bug ? dead : work;
+  document.getElementById('dlbar').innerHTML = `<div class="work${late && !bug ? ' cut' : ''}" style="width:${pct(shown)}%"></div><div class="dead${pct(dead) > 70 ? ' flip' : ''}" style="left:${pct(dead)}%"><span>deadline ${dead} ms</span></div><span class="lbl">${L('работа сервера', 'server work')}</span>`;
+  const v = document.getElementById('d-verdict');
+  if (!late) { v.className = 'verdict ok'; v.innerHTML = `<b>OK · ${work} ms</b><span>${L('Работа уложилась в дедлайн. Это граничный тест «100 мс работы при дедлайне 1 с».', 'The work fits the deadline: the boundary test “100 ms of work, 1 s deadline”.')}</span>`; }
+  else if (!bug) { v.className = 'verdict bad'; v.innerHTML = `<b>DEADLINE_EXCEEDED · ${L('клиент ждал', 'client waited')} ≈ ${dead} ms</b><div>grpcStats.delayedCallsAbandoned + 1</div><span>${L('Клиент не ждёт лишнего, сервер получил cancelled и снял таймер. Тест проверяет оба факта.', 'The client does not wait longer, the server got “cancelled” and cleared its timer. The test checks both.')}</span>`; }
+  else { v.className = 'verdict bad'; v.innerHTML = `<b>DEADLINE_EXCEEDED · ${L('но сервер работал ещё', 'but the server worked on for')} ${work - dead} ms</b><div>grpcStats.delayedCallsAbandoned + 0 → ${L('тест падает', 'the test fails')}</div><span>${L('Клиент ответ уже не примет, а сервер тратит CPU и соединения. Под нагрузкой из-за этого падают сервисы.', 'Nobody will take the answer, yet the server burns CPU and connections. Under load this is how services fall over.')}</span>`; }
+}
+['d-work', 'd-dead', 'd-bug'].forEach((id) => document.getElementById(id).addEventListener('input', renderDl));
+
+/* stream */
+let sBug = false, sTimer = null;
+function seeded(seed) { let a = seed >>> 0; return () => { a = (a + 0x6d2b79f5) >>> 0; let t = a; t = Math.imul(t ^ (t >>> 15), t | 1); t ^= t + Math.imul(t ^ (t >>> 7), t | 61); return ((t ^ (t >>> 14)) >>> 0) / 4294967296; }; }
+function runStream() {
+  clearInterval(sTimer);
+  const rnd = seeded(7);
+  const P = { EURUSD: { mid: 108500, d: 5, seq: 41, rows: [] }, USDJPY: { mid: 151200, d: 3, seq: 17, rows: [] } };
+  let sent = 0, gaps = 0, ticks = 0;
+  const fmt = (u, d) => (u / 10 ** d).toFixed(d);
+  const push = (pair, snap) => {
+    const p = P[pair];
+    if (!snap) { p.mid += Math.round((rnd() - 0.5) * 10); p.seq++; }
+    const spread = 10 + Math.floor(rnd() * 21), bid = p.mid - Math.floor(spread / 2);
+    const drop = !snap && sBug && p.seq % 10 === 0 && sent > 2;
+    if (drop) return;
+    const prev = p.rows[p.rows.length - 1];
+    const gap = prev && p.seq !== prev.seq + 1;
+    if (gap) gaps++;
+    p.rows.push({ seq: p.seq, bid: fmt(bid, p.d), ask: fmt(bid + spread, p.d), snap, gap, from: prev?.seq });
+    sent++;
+  };
+  push('EURUSD', true); push('USDJPY', true);
+  const draw = () => {
+    for (const [id, pair] of [['s-a', 'EURUSD'], ['s-b', 'USDJPY']]) {
+      const rows = P[pair].rows.slice(-9);
+      document.getElementById(id).innerHTML = `<h3>${pair}</h3>` + rows.map((r) => `<div class="tick${r.snap ? ' snap' : ''}${r.gap ? ' gap' : ''}"><span>${r.gap ? '⚠ ' : ''}${r.seq}</span><span class="bid">${r.bid}</span><span class="ask">${r.ask}</span></div>`).join('');
+    }
+    const v = document.getElementById('s-verdict');
+    if (gaps) { v.className = 'verdict bad'; v.innerHTML = `<b>seqGaps(messages) = ${gaps} ${L('пропуск(ов)', 'gap(s)')}</b><span>${L('Тест «… without gaps …» падает: клиент не узнал бы о потерянной цене без seq.', 'The “… without gaps …” test fails: without seq the client would never know a price was lost.')}</span>`; }
+    else { v.className = 'verdict ok'; v.innerHTML = `<b>seqGaps(messages) = [] · ${sent} ${L('сообщений', 'messages')}</b><span>${L('Первыми пришли снимки обеих пар, дальше seq растёт ровно на 1.', 'Snapshots of both pairs came first; after that seq grows by exactly 1.')}</span>`; }
+  };
+  draw();
+  sTimer = setInterval(() => { ticks++; push('EURUSD'); push('USDJPY'); draw(); if (ticks >= (reduce ? 1 : 24)) { if (reduce) { for (let i = 0; i < 23; i++) { push('EURUSD'); push('USDJPY'); } draw(); } clearInterval(sTimer); } }, 220);
+}
+document.getElementById('s-run').addEventListener('click', runStream);
+document.getElementById('s-bug').addEventListener('click', (e) => { sBug = !sBug; e.currentTarget.setAttribute('aria-pressed', sBug); e.currentTarget.classList.toggle('danger', sBug); e.currentTarget.classList.toggle('ghost', !sBug); runStream(); });
+
+/* proto edits */
+const BASE = [
+  'message Quote {',
+  '  string pair = 1;',
+  '  string bid = 2;',
+  '  string ask = 3;',
+  '  uint64 seq = 4;',
+  '  google.protobuf.Timestamp time = 5;',
+  '}',
+  '',
+  'enum Side {',
+  '  SIDE_UNSPECIFIED = 0;',
+  '  SIDE_BUY = 1;',
+  '  SIDE_SELL = 2;',
+  '}',
+];
+const EDITS = [
+  { id: 'type', n: ['bid: string → double', 'bid: string → double'], del: [2], add: [[2, '  double bid = 2;']], rule: 'FIELD_SAME_TYPE', why: ['Старый клиент прочтёт байты как строку и получит мусор. Цены строками выбраны нарочно: без двоичной плавающей точки.', 'An old client reads the bytes as a string and gets garbage. Prices are strings on purpose: no binary floating point.'] },
+  { id: 'del', n: ['удалить seq', 'remove seq'], ru: 1, del: [4], add: [], rule: 'FIELD_NO_DELETE', why: ['Клиенты, которые ищут пропуски по seq, получат 0 и молча перестанут их видеть.', 'Clients that look for gaps by seq get 0 and silently stop seeing them.'] },
+  { id: 'num', n: ['ask: номер 3 → 6', 'ask: number 3 → 6'], del: [3], add: [[3, '  string ask = 6;']], rule: 'FIELD_NO_DELETE', why: ['В двоичном виде поле узнают по номеру, не по имени. Для старого клиента поле 3 исчезло.', 'On the wire a field is known by number, not name. For an old client field 3 is gone.'] },
+  { id: 'name', n: ['bid → bid_price', 'bid → bid_price'], del: [2], add: [[2, '  string bid_price = 2;']], rule: 'FIELD_SAME_JSON_NAME', why: ['Двоичные клиенты переживут, а JSON-клиенты (grpcurl, gRPC-Gateway) — нет: ключ в JSON сменился.', 'Binary clients survive; JSON clients (grpcurl, gRPC-Gateway) do not: the JSON key changed.'] },
+  { id: 'enum', n: ['удалить SIDE_SELL', 'remove SIDE_SELL'], del: [11], add: [], rule: 'ENUM_VALUE_NO_DELETE', why: ['Старые клиенты продолжат слать 2, а сервер его уже не знает.', 'Old clients keep sending 2; the server no longer knows it.'] },
+  { id: 'safe', n: ['добавить venue = 6', 'add venue = 6'], del: [], add: [[5, '  string venue = 6;']], rule: null, why: ['Безопасно: старые клиенты пропускают незнакомые поля. Единственный тест, где buf молчит.', 'Safe: old clients skip unknown fields. The only test where buf says nothing.'] },
+];
+let editSel = 'type';
+function renderProto() {
+  document.getElementById('edits').innerHTML = EDITS.map((e) => `<button type="button" data-e="${e.id}" aria-pressed="${e.id === editSel}">${L(...e.n)}</button>`).join('');
+  const e = EDITS.find((x) => x.id === editSel);
+  const lines = [];
+  BASE.forEach((l, i) => {
+    if (e.del.includes(i)) lines.push(`<span class="ln del">- ${esc(l)}</span>`); else lines.push(`<span class="ln">  ${esc(l)}</span>`);
+    e.add.filter((a) => a[0] === i).forEach((a) => lines.push(`<span class="ln add">+ ${esc(a[1])}</span>`));
+  });
+  document.getElementById('proto').innerHTML = lines.join('');
+  const v = document.getElementById('p-verdict');
+  v.className = 'verdict ' + (e.rule ? 'bad' : 'ok');
+  v.innerHTML = e.rule ? `<b>buf breaking → ${e.rule}</b><span>${L(...e.why)}</span>` : `<b>buf breaking → ${L('нет нарушений', 'no violations')}</b><span>${L(...e.why)}</span>`;
+}
+document.getElementById('edits').addEventListener('click', (ev) => { const b = ev.target.closest('[data-e]'); if (b) { editSel = b.dataset.e; renderProto(); } });
+
+/* mutations */
+const MUT = [
+  [['токен не проверяется', 'token not checked'], 'no token or a wrong token → UNAUTHENTICATED (+1)'],
+  [['работа идёт после дедлайна', 'work goes on after the deadline'], 'deadline shorter than the work … server stops'],
+  [['отменённый поток держит подписку', 'a cancelled stream keeps its listener'], 'the client cancels mid-stream …'],
+  [['нет снимка перед живыми ценами', 'no snapshot before live updates'], 'a quiet market still answers at once …'],
+  [['каждое 10-е обновление теряется', 'every 10th update dropped'], '… without gaps … (+1)'],
+  [['покупатель платит bid', 'the buyer pays the bid'], 'buy pays the ask, sell gets the bid …'],
+  [['дубли client_order_id проходят', 'duplicate order ids allowed'], 'a mixed batch … (+1)'],
+  [['лимит ордеров: >= вместо >', 'order limit: >= instead of >'], '1 000 orders pass, 1 001 → RESOURCE_EXHAUSTED'],
+  [['неизвестная пара → INVALID_ARGUMENT', 'unknown pair → INVALID_ARGUMENT'], '… → NOT_FOUND (2)'],
+  [['x-request-id не в trailers', 'x-request-id missing from trailers'], 'x-request-id is echoed …'],
+  [['USDJPY с 5 знаками', 'USDJPY with 5 decimals'], 'a quote has the contract …'],
+  [['нет лимита размера запроса', 'no request size limit'], 'a request over 64 KiB → RESOURCE_EXHAUSTED'],
+];
+function renderMut() { document.getElementById('mut').innerHTML = MUT.map((m) => `<div class="mrow"><span>${L(...m[0])}</span><code>${esc(m[1])}</code><span class="kill">${L('пойман', 'caught')}</span></div>`).join(''); }
+
+const TERMS = [
+  ['Protocol Buffers (.proto)', ['Язык описания сообщений и сервисов. Из него генерируется код клиента и сервера, а сообщения кодируются в компактный двоичный вид.', 'A language for messages and services. Client and server code is generated from it; messages are encoded as compact binary.']],
+  ['RPC', ['Remote Procedure Call: вызов функции на другом сервере так, будто она локальная.', 'Remote Procedure Call: calling a function on another server as if it were local.']],
+  ['Stream', ['Последовательность сообщений в одном вызове: от сервера, от клиента или в обе стороны.', 'A sequence of messages in one call: from the server, from the client, or both ways.']],
+  ['Deadline', ['Момент, после которого ответ клиенту уже не нужен. Передаётся серверу вместе с вызовом.', 'The moment after which the client no longer needs the answer. Sent to the server with the call.']],
+  ['Metadata / trailers', ['Аналог HTTP-заголовков: metadata идёт до ответа, trailers — после (там же статус).', 'Like HTTP headers: metadata comes before the response, trailers after it (with the status).']],
+  ['Reflection', ['Сервис, который рассказывает о своём API. grpcurl и Postman работают без .proto-файла.', 'A service that describes its own API, so grpcurl and Postman work without the .proto file.']],
+  ['Health checking', ['Стандартный сервис grpc.health.v1: SERVING или NOT_SERVING. Его опрашивают Kubernetes и балансировщики.', 'The standard grpc.health.v1 service: SERVING or NOT_SERVING. Kubernetes and load balancers poll it.']],
+  ['buf', ['Инструмент для .proto: lint по правилам стиля и breaking — сравнение двух версий контракта.', 'A .proto tool: lint against style rules, and breaking, which compares two versions of the contract.']],
+];
+function renderTerms() { document.getElementById('terms').innerHTML = TERMS.map((t) => `<div><dt>${t[0]}</dt><dd>${L(...t[1])}</dd></div>`).join(''); }
+
+const CMDS = ['npm run test:grpc', 'npm run test:contract', 'npm run quotes:dev', "grpcurl -plaintext localhost:50051 list", `grpcurl -plaintext -H 'authorization: Bearer dev-token' -d '{"pair":"EURUSD"}' localhost:50051 quotes.v1.QuoteService/GetQuote`];
+function renderCmds() { document.getElementById('cmds').innerHTML = CMDS.map((c, i) => `<div class="cmd"><code id="cmd-${i}">${esc(c)}</code><button type="button" data-c="${i}">${L('Копировать', 'Copy')}</button></div>`).join(''); }
+document.getElementById('cmds').addEventListener('click', (e) => {
+  const b = e.target.closest('[data-c]'); if (!b) return;
+  const done = () => { b.textContent = L('Скопировано', 'Copied'); setTimeout(() => (b.textContent = L('Копировать', 'Copy')), 1500); };
+  const fallback = () => { const r = document.createRange(); r.selectNodeContents(document.getElementById('cmd-' + b.dataset.c)); const s = getSelection(); s.removeAllRanges(); s.addRange(r); };
+  try { navigator.clipboard.writeText(CMDS[+b.dataset.c]).then(done, fallback); } catch (err) { fallback(); }
+});
+
+function renderAll() { renderLanes(); renderCodes(); renderDl(); renderProto(); renderMut(); renderTerms(); renderCmds(); runStream(); }
+function setLang(l) {
+  S.lang = l; document.body.dataset.lang = l; document.documentElement.lang = l;
+  document.getElementById('lang-ru').setAttribute('aria-pressed', l === 'ru');
+  document.getElementById('lang-en').setAttribute('aria-pressed', l === 'en');
+  try { localStorage.setItem('grpc-lang', l); } catch (e) {}
+  renderAll();
+}
+document.querySelectorAll('.seg button').forEach((b) => b.addEventListener('click', () => setLang(b.dataset.l)));
+let start = 'ru';
+try { start = localStorage.getItem('grpc-lang') || document.documentElement.dataset.defaultLang || 'ru'; } catch (e) { start = document.documentElement.dataset.defaultLang || 'ru'; }
+setLang(start);
+</script>
+</body>
+</html>
