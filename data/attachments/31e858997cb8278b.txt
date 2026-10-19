@@ -1,7 +1,0 @@
-Subscribe  (3 ms)
-Call options: {"token":"***"}
-Request: {"pairs":["EURUSA","EURUSB","EURUSC","EURUSD","EURUSE","EURUSF","EURUSG","EURUSH","EURUSI","EURUSJ","EURUSK"],"max_updates":5}
-Status: INVALID_ARGUMENT pairs must list 1 … 10 pairs
-Headers: {"content-type":"application/grpc+proto","date":"Mon, 19 Oct 2026 16:09:17 GMT"}
-Trailers: {}
-Messages (0):
