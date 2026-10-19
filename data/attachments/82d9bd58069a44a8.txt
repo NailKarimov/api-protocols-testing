@@ -1,0 +1,12 @@
+Subscribe  (94 ms)
+Call options: {"token":"***"}
+Request: {"pairs":["EURUSD"],"max_updates":0}
+Status: CANCELLED Cancelled on client
+Headers: {"content-type":"application/grpc+proto","date":"Mon, 19 Oct 2026 16:09:17 GMT"}
+Trailers: {}
+Messages (5):
+  {"pair":"EURUSD","bid":"1.08483","ask":"1.08507","seq":25,"time":{"seconds":1792426157,"nanos":218000000}}
+  {"pair":"EURUSD","bid":"1.08486","ask":"1.08497","seq":26,"time":{"seconds":1792426157,"nanos":238000000}}
+  {"pair":"EURUSD","bid":"1.08491","ask":"1.08502","seq":27,"time":{"seconds":1792426157,"nanos":259000000}}
+  {"pair":"EURUSD","bid":"1.08485","ask":"1.08506","seq":28,"time":{"seconds":1792426157,"nanos":278000000}}
+  {"pair":"EURUSD","bid":"1.08492","ask":"1.08507","seq":29,"time":{"seconds":1792426157,"nanos":299000000}}

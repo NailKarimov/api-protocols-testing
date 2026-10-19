@@ -1,0 +1,22 @@
+Subscribe  (302 ms)
+Call options: {"deadlineMs":300,"token":"***"}
+Request: {"pairs":["USDCHF"],"max_updates":0}
+Status: DEADLINE_EXCEEDED Deadline exceeded after 0.300s,name resolution: 0.001s,LB pick: 0.001s,remote_addr=127.0.0.1:35955
+Headers: {"content-type":"application/grpc+proto","date":"Mon, 19 Oct 2026 16:09:17 GMT"}
+Trailers: {}
+Messages (15):
+  {"pair":"USDCHF","bid":"0.88100","ask":"0.88124","seq":31,"time":{"seconds":1792426157,"nanos":248000000}}
+  {"pair":"USDCHF","bid":"0.88106","ask":"0.88117","seq":32,"time":{"seconds":1792426157,"nanos":268000000}}
+  {"pair":"USDCHF","bid":"0.88102","ask":"0.88126","seq":33,"time":{"seconds":1792426157,"nanos":289000000}}
+  {"pair":"USDCHF","bid":"0.88101","ask":"0.88121","seq":34,"time":{"seconds":1792426157,"nanos":308000000}}
+  {"pair":"USDCHF","bid":"0.88097","ask":"0.88124","seq":35,"time":{"seconds":1792426157,"nanos":328000000}}
+  {"pair":"USDCHF","bid":"0.88102","ask":"0.88122","seq":36,"time":{"seconds":1792426157,"nanos":349000000}}
+  {"pair":"USDCHF","bid":"0.88096","ask":"0.88123","seq":37,"time":{"seconds":1792426157,"nanos":369000000}}
+  {"pair":"USDCHF","bid":"0.88105","ask":"0.88119","seq":38,"time":{"seconds":1792426157,"nanos":390000000}}
+  {"pair":"USDCHF","bid":"0.88106","ask":"0.88122","seq":39,"time":{"seconds":1792426157,"nanos":409000000}}
+  {"pair":"USDCHF","bid":"0.88102","ask":"0.88128","seq":40,"time":{"seconds":1792426157,"nanos":430000000}}
+  {"pair":"USDCHF","bid":"0.88105","ask":"0.88133","seq":41,"time":{"seconds":1792426157,"nanos":449000000}}
+  {"pair":"USDCHF","bid":"0.88111","ask":"0.88131","seq":42,"time":{"seconds":1792426157,"nanos":470000000}}
+  {"pair":"USDCHF","bid":"0.88105","ask":"0.88134","seq":43,"time":{"seconds":1792426157,"nanos":491000000}}
+  {"pair":"USDCHF","bid":"0.88104","ask":"0.88134","seq":44,"time":{"seconds":1792426157,"nanos":510000000}}
+  {"pair":"USDCHF","bid":"0.88113","ask":"0.88130","seq":45,"time":{"seconds":1792426157,"nanos":531000000}}
