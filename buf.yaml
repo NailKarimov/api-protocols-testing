@@ -1,0 +1,10 @@
+# buf: lint and breaking-change rules for the .proto contract (docs/grpc.md).
+version: v2
+modules:
+  - path: proto
+lint:
+  use:
+    - STANDARD
+breaking:
+  use:
+    - FILE

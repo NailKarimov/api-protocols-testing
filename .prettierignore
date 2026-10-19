@@ -1,0 +1,8 @@
+node_modules
+package-lock.json
+test-results
+playwright-report
+allure-results
+allure-report
+docs/grpc.html
+contracts/quotes.v1.binpb

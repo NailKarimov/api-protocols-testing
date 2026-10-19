@@ -1,0 +1,56 @@
+{
+  "name": "api-protocols-testing",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Testing beyond REST: one FX quotes service of our own served over gRPC (unary and all three streaming kinds, deadlines, status codes, metadata), WebSocket and Server-Sent Events. TypeScript + Playwright Test + Allure, GitHub Actions.",
+  "license": "MIT",
+  "scripts": {
+    "test": "playwright test",
+    "test:smoke": "playwright test --grep @smoke",
+    "test:grpc": "playwright test --project=grpc",
+    "quotes:dev": "node --experimental-strip-types --disable-warning=MODULE_TYPELESS_PACKAGE_JSON services/quotes/src/server.mts",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "typecheck": "tsc --noEmit",
+    "allure:generate": "node scripts/allure-prepare.mjs && allure generate allure-results -o allure-report --clean",
+    "allure:open": "allure open allure-report",
+    "prepare": "husky",
+    "proto:lint": "buf lint && buf format --diff --exit-code",
+    "proto:approve": "buf build -o contracts/quotes.v1.binpb",
+    "test:contract": "playwright test --project=contract"
+  },
+  "lint-staged": {
+    "*.{ts,mjs,js}": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "*.{json,md,yml,yaml}": "prettier --write"
+  },
+  "devDependencies": {
+    "@bufbuild/buf": "^1.74.0",
+    "@eslint/js": "^10.0.1",
+    "@grpc/grpc-js": "^1.14.6",
+    "@grpc/proto-loader": "^0.8.1",
+    "@grpc/reflection": "^1.0.4",
+    "@playwright/test": "^1.64.1",
+    "@types/node": "^26.6.5",
+    "@types/ws": "^8.18.2",
+    "allure-commandline": "^2.46.1",
+    "allure-js-commons": "^3.14.0",
+    "allure-playwright": "^3.14.0",
+    "dotenv": "^18.0.8",
+    "eslint": "^10.13.0",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-playwright": "^2.12.1",
+    "grpc-health-check": "^2.1.0",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.4.0",
+    "prettier": "^3.9.10",
+    "typescript": "^6.0.3",
+    "typescript-eslint": "^8.71.2",
+    "ws": "^8.22.0",
+    "zod": "^4.6.7"
+  }
+}

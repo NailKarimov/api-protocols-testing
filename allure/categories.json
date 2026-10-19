@@ -1,0 +1,44 @@
+[
+  {
+    "name": "Known defects (expected failure, test.fail)",
+    "messageRegex": ".*Expected to fail, but passed.*",
+    "matchedStatuses": ["failed"]
+  },
+  {
+    "name": "Fixed defects: remove the test.fail marker",
+    "messageRegex": ".*Expected to fail, but passed.*",
+    "matchedStatuses": ["broken"]
+  },
+  {
+    "name": "Contract violations (schema)",
+    "messageRegex": ".*(schema|Schema|ZodError|Invalid input).*",
+    "matchedStatuses": ["failed"]
+  },
+  {
+    "name": "Security findings",
+    "messageRegex": ".*(Strict-Transport-Security|nosniff|X-Powered-By|CORS|credentials|stack trace|WADL).*",
+    "matchedStatuses": ["failed"]
+  },
+  {
+    "name": "Slow responses",
+    "messageRegex": ".*(durationMs|response time|toBeLessThan).*",
+    "matchedStatuses": ["failed"]
+  },
+  {
+    "name": "Infrastructure (stack down, no API key, network)",
+    "messageRegex": ".*(not running|UNAVAILABLE|ECONNREFUSED|ENOTFOUND|ETIMEDOUT|socket hang up).*",
+    "matchedStatuses": ["broken", "failed"]
+  },
+  {
+    "name": "Skipped tests",
+    "matchedStatuses": ["skipped"]
+  },
+  {
+    "name": "Product defects (assertion failures)",
+    "matchedStatuses": ["failed"]
+  },
+  {
+    "name": "Test defects (errors in the tests)",
+    "matchedStatuses": ["broken"]
+  }
+]

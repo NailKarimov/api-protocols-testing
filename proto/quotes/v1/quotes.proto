@@ -1,0 +1,95 @@
+// FX quotes service: one feed of bid/ask prices, the same data that the WebSocket and SSE endpoints serve.
+// Written to be tested (docs/grpc.md). Package versioned as quotes.v1 so a breaking change gets a v2.
+syntax = "proto3";
+
+package quotes.v1;
+
+import "google/protobuf/timestamp.proto";
+
+service QuoteService {
+  // Unary: the latest quote for one pair.
+  rpc GetQuote(GetQuoteRequest) returns (GetQuoteResponse);
+
+  // Server streaming: live quotes for several pairs until the client cancels or max_updates is reached.
+  rpc Subscribe(SubscribeRequest) returns (stream SubscribeResponse);
+
+  // Client streaming: a batch of orders uploaded as a stream, one summary at the end.
+  rpc SubmitOrders(stream SubmitOrdersRequest) returns (SubmitOrdersResponse);
+
+  // Bidirectional streaming: every order gets a fill (or a rejection) as soon as it arrives.
+  rpc Trade(stream TradeRequest) returns (stream TradeResponse);
+}
+
+message GetQuoteRequest {
+  // Six upper-case letters, base then quote currency: "EURUSD".
+  string pair = 1;
+  // Test hook: the server waits this long before answering (0 … 10 000 ms), to exercise deadlines.
+  uint32 delay_ms = 2;
+}
+
+// Every RPC has its own request and response message (buf STANDARD lint), so one RPC can gain a field
+// without changing the others. Shared data lives in Quote and Order.
+message GetQuoteResponse {
+  Quote quote = 1;
+}
+
+message SubscribeRequest {
+  repeated string pairs = 1; // 1 … 10 distinct pairs
+  uint32 max_updates = 2; // 0 = until cancelled
+}
+
+message SubscribeResponse {
+  Quote quote = 1;
+}
+
+message Quote {
+  string pair = 1;
+  // Prices as decimal strings with 5 places ("1.08534"): no binary floating point for money.
+  string bid = 2;
+  string ask = 3;
+  // Strictly increasing per pair, without gaps: a client can detect a lost update.
+  uint64 seq = 4;
+  google.protobuf.Timestamp time = 5;
+}
+
+enum Side {
+  SIDE_UNSPECIFIED = 0; // proto3 rule: the zero value means "not set" and is rejected
+  SIDE_BUY = 1;
+  SIDE_SELL = 2;
+}
+
+message Order {
+  string client_order_id = 1; // unique per stream
+  string pair = 2;
+  Side side = 3;
+  string amount = 4; // decimal string, 1 … 1 000 000, at most 2 places
+}
+
+message SubmitOrdersRequest {
+  Order order = 1;
+}
+
+message SubmitOrdersResponse {
+  uint32 accepted = 1;
+  uint32 rejected = 2;
+  // Sum of accepted amounts, decimal string.
+  string total_amount = 3;
+  repeated Rejection rejections = 4;
+}
+
+message Rejection {
+  string client_order_id = 1;
+  string reason = 2;
+}
+
+message TradeRequest {
+  Order order = 1;
+}
+
+message TradeResponse {
+  string client_order_id = 1;
+  bool accepted = 2;
+  string price = 3; // the ask for a buy, the bid for a sell; empty when rejected
+  string reason = 4; // why it was rejected; empty when accepted
+  uint64 quote_seq = 5;
+}
