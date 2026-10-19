@@ -1,0 +1,8 @@
+GetQuote  (2 ms)
+Call options: {"token":"***"}
+Request: {"pair":"USDJPY","delay_ms":0}
+Status: OK OK
+Headers: {"content-type":"application/grpc+proto","date":"Mon, 19 Oct 2026 16:29:33 GMT"}
+Trailers: {}
+Messages (1):
+  {"quote":{"pair":"USDJPY","bid":"151.175","ask":"151.196","seq":52,"time":{"seconds":1792427373,"nanos":184000000}}}

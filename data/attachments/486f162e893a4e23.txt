@@ -1,7 +1,0 @@
-Subscribe  (7 ms)
-Call options: {"token":"***"}
-Request: {"pairs":[],"max_updates":5}
-Status: INVALID_ARGUMENT pairs must list 1 … 10 pairs
-Headers: {"content-type":"application/grpc+proto","date":"Mon, 19 Oct 2026 16:13:23 GMT"}
-Trailers: {}
-Messages (0):

@@ -1,0 +1,8 @@
+GetQuote  (3 ms)
+Call options: {"requestId":"req-42","token":"***"}
+Request: {"pair":"EURUSD","delay_ms":0}
+Status: OK OK
+Headers: {"content-type":"application/grpc+proto","x-request-id":"req-42","date":"Mon, 19 Oct 2026 16:29:33 GMT"}
+Trailers: {"x-request-id":"req-42"}
+Messages (1):
+  {"quote":{"pair":"EURUSD","bid":"1.08493","ask":"1.08515","seq":58,"time":{"seconds":1792427373,"nanos":338000000}}}

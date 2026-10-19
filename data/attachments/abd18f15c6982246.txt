@@ -1,0 +1,6 @@
+http://127.0.0.1:38291/sse  (Authorization: Bearer ***)
+16:29:35.655 GET /sse?pairs=EURUSD
+16:29:35.660 200 text/event-stream; charset=utf-8
+16:29:35.662 (client closes the stream)
+16:29:35.664 stream ended
+16:29:35.769 (client closes the stream)
