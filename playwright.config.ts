@@ -13,6 +13,8 @@ export default defineConfig({
   projects: [
     // gRPC: quotes.v1.QuoteService in-process per worker (docs/grpc.md).
     { name: 'grpc', testDir: './tests/grpc' },
+    // WebSocket and SSE on the same feed (docs/realtime.md).
+    { name: 'realtime', testDir: './tests/realtime' },
     // The .proto contract: buf breaking against the approved snapshot, with a self-test of typical edits.
     { name: 'contract', testDir: './tests/contract' },
   ],

@@ -1,0 +1,469 @@
+<!doctype html>
+<html lang="en" data-default-lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>WebSocket и SSE на котировках</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@112,700;112,800&family=Atkinson+Hyperlegible:wght@400;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+/* Layout: the same trading-desk wire as the gRPC page. Two live tapes side by side (WebSocket frames, SSE text),
+   then a connection you cut and resume, the heartbeat that finds dead clients, close codes, SSE anatomy, bugs. */
+:root {
+  --bg: #f1f4f3; --surface: #ffffff; --sunken: #e2e8e6; --ink: #0f1a17; --muted: #55635f; --line: #cdd7d4;
+  --accent: #0b7a6e; --accent-soft: #d6efeb;
+  --client: #2f5bd3; --server: #0b7a6e;
+  --ok: #18794e; --ok-soft: #d9f2e5; --bad: #b42318; --bad-soft: #fbe2df; --warn: #a15c00; --warn-soft: #fbecd2;
+  --font-display: 'Archivo', 'Atkinson Hyperlegible', system-ui, sans-serif;
+  --font-body: 'Atkinson Hyperlegible', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-mono: 'IBM Plex Mono', ui-monospace, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0b1210; --surface: #121c19; --sunken: #192522; --ink: #e6efec; --muted: #9db0aa; --line: #273733;
+    --accent: #4fd1bf; --accent-soft: #123a34; --client: #8aa8ff; --server: #4fd1bf;
+    --ok: #5fd394; --ok-soft: #12321f; --bad: #ff8a7d; --bad-soft: #3d1714; --warn: #f3b562; --warn-soft: #3a2a10;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0b1210; --surface: #121c19; --sunken: #192522; --ink: #e6efec; --muted: #9db0aa; --line: #273733;
+  --accent: #4fd1bf; --accent-soft: #123a34; --client: #8aa8ff; --server: #4fd1bf;
+  --ok: #5fd394; --ok-soft: #12321f; --bad: #ff8a7d; --bad-soft: #3d1714; --warn: #f3b562; --warn-soft: #3a2a10;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--ink); font: 400 16px/1.6 var(--font-body); margin: 0; }
+body[data-lang="ru"] [lang="en"], body[data-lang="en"] [lang="ru"] { display: none !important; }
+.wrap { max-width: 1080px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 0 64px; }
+h1, h2, h3 { font-family: var(--font-display); font-stretch: 112%; text-wrap: balance; line-height: 1.1; margin: 0; }
+h1 { font-size: clamp(31px, 5vw, 52px); font-weight: 800; }
+h2 { font-size: clamp(22px, 2.9vw, 30px); font-weight: 800; }
+h3 { font-size: 16px; font-weight: 700; }
+p { margin: 0; max-width: 70ch; }
+code, .mono { font-family: var(--font-mono); font-size: 0.86em; }
+a { color: var(--accent); }
+button { font-family: var(--font-body); }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 4px; }
+.eyebrow { font: 500 12px/1 var(--font-mono); letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+.muted { color: var(--muted); }
+header.top { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding-block: 20px; flex-wrap: wrap; }
+.seg { display: inline-flex; border: 1px solid var(--line); border-radius: 999px; overflow: hidden; }
+.seg button { font: 500 13px var(--font-mono); background: transparent; color: var(--muted); border: 0; padding: 6px 14px; cursor: pointer; }
+.seg button[aria-pressed="true"] { background: var(--ink); color: var(--bg); }
+.hero { display: grid; gap: 16px; padding-block: 8px 8px; }
+.hero .lead { font-size: 18px; color: var(--muted); }
+.facts { display: flex; flex-wrap: wrap; gap: 8px 22px; font-size: 14px; color: var(--muted); }
+.facts b { font: 800 22px var(--font-display); color: var(--ink); margin-right: 6px; font-variant-numeric: tabular-nums; }
+section.station { display: grid; gap: 16px; padding-block: 48px 0; }
+section.station > header { display: grid; gap: 8px; }
+.btn { font: 700 14px var(--font-body); background: var(--ink); color: var(--bg); border: 0; border-radius: 8px; padding: 8px 14px; cursor: pointer; }
+.btn.ghost { background: transparent; color: var(--ink); border: 1px solid var(--line); }
+.btn.danger { background: var(--bad); color: var(--surface); }
+.row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+
+
+/* twin tapes */
+.twin { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+@media (max-width: 760px) { .twin { grid-template-columns: minmax(0, 1fr); } }
+.tape { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; display: grid; grid-template-rows: auto 1fr; min-width: 0; overflow: hidden; }
+.tape h3 { padding: 10px 14px; border-bottom: 1px solid var(--line); display: flex; justify-content: space-between; gap: 8px; align-items: baseline; flex-wrap: wrap; }
+.tape h3 small { font: 400 12px var(--font-mono); color: var(--muted); }
+.tape pre { margin: 0; padding: 10px 14px; font: 400 12px/1.6 var(--font-mono); height: 300px; overflow: auto; white-space: pre; }
+.tape .hs { color: var(--muted); }
+.tape .fr { color: var(--client); }
+.tape .k { color: var(--accent); font-weight: 600; }
+.tape .cm { color: var(--muted); font-style: italic; }
+.tape .new { background: var(--accent-soft); }
+
+/* resume */
+.res { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 14px; display: grid; gap: 12px; }
+.strip { display: flex; gap: 3px; flex-wrap: wrap; }
+.strip span { min-width: 34px; text-align: center; font: 600 11.5px var(--font-mono); padding: 6px 4px; border-radius: 5px; background: var(--sunken); color: var(--muted); font-variant-numeric: tabular-nums; }
+.strip span.got { background: var(--ok-soft); color: var(--ok); }
+.strip span.replay { background: var(--accent-soft); color: var(--accent); outline: 1px solid var(--accent); }
+.strip span.miss { background: var(--bad); color: var(--surface); }
+.strip span.off { background: var(--warn-soft); color: var(--warn); }
+.strip span.reset { background: var(--warn); color: var(--surface); }
+.legend { display: flex; gap: 14px; flex-wrap: wrap; font-size: 13px; color: var(--muted); }
+.legend i { display: inline-block; width: 12px; height: 12px; border-radius: 3px; vertical-align: -2px; margin-right: 5px; }
+.toggle { display: flex; gap: 8px; align-items: center; font-size: 14.5px; }
+
+/* heartbeat */
+.hb { display: grid; gap: 8px; }
+.hbrow { display: grid; grid-template-columns: 150px minmax(0, 1fr) 120px; gap: 10px; align-items: center; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 10px 14px; }
+@media (max-width: 640px) { .hbrow { grid-template-columns: minmax(0, 1fr); } }
+.hbrow b { font-size: 14.5px; }
+.beats { display: flex; gap: 4px; flex-wrap: wrap; min-height: 26px; align-items: center; }
+.beats span { font: 600 10.5px var(--font-mono); padding: 3px 6px; border-radius: 4px; }
+.beats .ping { background: var(--sunken); color: var(--server); }
+.beats .pong { background: var(--accent-soft); color: var(--client); }
+.beats .missed { background: var(--bad-soft); color: var(--bad); }
+.beats .term { background: var(--bad); color: var(--surface); }
+.state { font: 600 12px var(--font-mono); padding: 4px 10px; border-radius: 999px; justify-self: start; }
+.state.open { background: var(--ok-soft); color: var(--ok); } .state.dead { background: var(--bad-soft); color: var(--bad); }
+
+/* close codes */
+.cc { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 6px; }
+.ccb { text-align: left; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; cursor: pointer; display: grid; gap: 2px; color: var(--ink); }
+.ccb b { font: 700 17px var(--font-mono); }
+.ccb small { font-size: 12.5px; color: var(--muted); }
+.ccb[aria-pressed="true"] { border-color: var(--accent); background: var(--accent-soft); }
+.note { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px; display: grid; gap: 6px; font-size: 15px; }
+
+/* sse anatomy */
+.anat { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); gap: 12px; }
+@media (max-width: 760px) { .anat { grid-template-columns: minmax(0, 1fr); } }
+.lines { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 10px 0; overflow-x: auto; }
+.lines button { display: block; width: 100%; text-align: left; border: 0; background: transparent; padding: 3px 14px; font: 400 12.5px/1.6 var(--font-mono); color: var(--ink); cursor: pointer; white-space: pre; }
+.lines button.blank { color: var(--muted); }
+.lines button[aria-pressed="true"] { background: var(--accent-soft); }
+.lines button:hover { background: var(--sunken); }
+
+.verdict { font: 500 13px/1.55 var(--font-mono); padding: 12px 14px; border-radius: 10px; overflow-wrap: anywhere; display: grid; gap: 4px; }
+.verdict.ok { background: var(--ok-soft); color: var(--ok); } .verdict.bad { background: var(--bad-soft); color: var(--bad); }
+.verdict span { color: var(--ink); font-family: var(--font-body); font-size: 14.5px; }
+.mut { display: grid; gap: 6px; }
+.mrow { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1.4fr) 84px; gap: 12px; align-items: center; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 10px 14px; font-size: 14.5px; }
+@media (max-width: 760px) { .mrow { grid-template-columns: minmax(0, 1fr); gap: 4px; } }
+.mrow code { font-size: 12px; color: var(--muted); }
+.kill { font: 600 12px var(--font-mono); padding: 4px 10px; border-radius: 999px; background: var(--ok-soft); color: var(--ok); text-align: center; justify-self: start; }
+.cmp { overflow-x: auto; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; }
+.cmp table { border-collapse: collapse; width: 100%; min-width: 600px; font-size: 14.5px; }
+.cmp th, .cmp td { padding: 9px 12px; border-bottom: 1px solid var(--line); text-align: left; vertical-align: top; }
+.cmp thead th { font: 600 12px var(--font-mono); color: var(--muted); text-transform: uppercase; letter-spacing: .05em; }
+.cmp tbody th { font-weight: 700; white-space: nowrap; }
+dl.terms { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin: 0; }
+@media (max-width: 760px) { dl.terms { grid-template-columns: minmax(0, 1fr); } }
+dl.terms div { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; }
+dl.terms dt { font: 700 15px var(--font-display); }
+dl.terms dd { margin: 4px 0 0; color: var(--muted); font-size: 14px; }
+.cmd { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px; align-items: center; background: var(--sunken); border-radius: 8px; padding: 6px 6px 6px 12px; }
+.cmd code { overflow-x: auto; white-space: nowrap; }
+.cmd button { font: 500 12px var(--font-body); border: 1px solid var(--line); background: var(--surface); color: var(--ink); border-radius: 6px; padding: 5px 10px; cursor: pointer; }
+footer { padding-top: 40px; color: var(--muted); font-size: 13px; display: flex; gap: 16px; flex-wrap: wrap; }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+</style>
+</head>
+<body data-lang="en">
+<div class="wrap">
+  <header class="top">
+    <span class="eyebrow">api-protocols-testing · /ws · /sse</span>
+    <div class="seg" role="group" aria-label="Language">
+      <button type="button" id="lang-ru" data-l="ru" aria-pressed="true">RU</button>
+      <button type="button" id="lang-en" data-l="en" aria-pressed="false">EN</button>
+    </div>
+  </header>
+
+  <section class="hero">
+    <h1 lang="ru">Живые данные: WebSocket и SSE</h1>
+    <h1 lang="en">Live data: WebSocket and SSE</h1>
+    <p class="lead" lang="ru">Тот же поток котировок, что и в gRPC, но через два способа, которыми сервер сам шлёт данные в браузер. Самое трудное здесь не первое сообщение, а обрыв связи: найти мёртвое соединение, переподключиться и не потерять ни одной цены.</p>
+    <p class="lead" lang="en">The same quote feed as gRPC, over the two ways a server pushes data to a browser. The hard part is not the first message but the broken connection: finding a dead one, reconnecting, and losing no price on the way.</p>
+    <div class="facts">
+      <span><b>32</b><span lang="ru">теста</span><span lang="en">tests</span></span>
+      <span><b>14/14</b><span lang="ru">внесённых багов пойманы</span><span lang="en">planted bugs caught</span></span>
+      <span><b>3</b><span lang="ru">протокола, одни и те же цены</span><span lang="en">protocols, same prices</span></span>
+    </div>
+  </section>
+
+  <section class="station">
+    <header>
+      <span class="eyebrow" lang="ru">Что по проводу</span><span class="eyebrow" lang="en">On the wire</span>
+      <h2 lang="ru">Одни и те же котировки, два формата</h2><h2 lang="en">The same quotes, two formats</h2>
+      <p class="muted" lang="ru">Слева кадры WebSocket после рукопожатия, справа сырой текст SSE. seq совпадает: это проверяет <code>cross-protocol.spec</code>.</p>
+      <p class="muted" lang="en">Left: WebSocket frames after the handshake. Right: raw SSE text. The seq numbers match; <code>cross-protocol.spec</code> checks exactly that.</p>
+    </header>
+    <div class="row"><button type="button" class="btn" id="t-run"><span lang="ru">Пустить поток</span><span lang="en">Start the feed</span></button></div>
+    <div class="twin">
+      <div class="tape"><h3>WebSocket <small>ws://…/ws · quotes.v1</small></h3><pre id="t-ws" tabindex="0"></pre></div>
+      <div class="tape"><h3>SSE <small>GET /sse?pairs=EURUSD</small></h3><pre id="t-sse" tabindex="0"></pre></div>
+    </div>
+    <div class="cmp"><table id="cmp"></table></div>
+  </section>
+
+  <section class="station">
+    <header>
+      <span class="eyebrow">since · Last-Event-ID</span>
+      <h2 lang="ru">Обрыв и возобновление без пропусков</h2><h2 lang="en">Drop and resume without a gap</h2>
+      <p class="muted" lang="ru">Клиент получает цены, потом связь пропадает, а рынок идёт дальше. При переподключении клиент говорит, на чём остановился, и сервер досылает пропущенное из истории.</p>
+      <p class="muted" lang="en">The client receives prices, then the connection goes, and the market moves on. On reconnect the client says where it stopped and the server replays the missed part from its history.</p>
+    </header>
+    <div class="res">
+      <div class="row">
+        <button type="button" class="btn danger" id="r-drop"><span lang="ru">Оборвать связь</span><span lang="en">Drop the connection</span></button>
+        <button type="button" class="btn" id="r-back"><span lang="ru">Переподключиться</span><span lang="en">Reconnect</span></button>
+        <button type="button" class="btn ghost" id="r-reset"><span lang="ru">Заново</span><span lang="en">Reset</span></button>
+      </div>
+      <label class="toggle"><input type="checkbox" id="r-since" checked> <span lang="ru">Клиент передаёт since / Last-Event-ID</span><span lang="en">The client sends since / Last-Event-ID</span></label>
+      <label class="toggle"><input type="checkbox" id="r-short"> <span lang="ru">Короткая история на сервере (5 котировок)</span><span lang="en">Short server history (5 quotes)</span></label>
+      <div class="strip" id="r-strip"></div>
+      <div class="legend">
+        <span><i style="background:var(--ok-soft);outline:1px solid var(--ok)"></i><span lang="ru">получено вживую</span><span lang="en">received live</span></span>
+        <span><i style="background:var(--warn-soft)"></i><span lang="ru">клиент офлайн</span><span lang="en">client offline</span></span>
+        <span><i style="background:var(--accent-soft);outline:1px solid var(--accent)"></i><span lang="ru">дослано при возобновлении</span><span lang="en">replayed on resume</span></span>
+        <span><i style="background:var(--bad)"></i><span lang="ru">потеряно</span><span lang="en">lost</span></span>
+      </div>
+      <div class="verdict" id="r-verdict" aria-live="polite"></div>
+    </div>
+  </section>
+
+  <section class="station">
+    <header>
+      <span class="eyebrow">ping / pong · heartbeat 200 ms</span>
+      <h2 lang="ru">Как сервер находит мёртвых клиентов</h2><h2 lang="en">How the server finds dead clients</h2>
+      <p class="muted" lang="ru">Телефон уехал в тоннель: TCP-соединение не закрылось, оно просто молчит. Сервер шлёт ping и ждёт pong. Кто пропустил ответ, того отключают и освобождают его подписку.</p>
+      <p class="muted" lang="en">A phone goes into a tunnel: the TCP connection is not closed, it just goes silent. The server sends a ping and waits for a pong. Whoever missed one is cut off and their subscription freed.</p>
+    </header>
+    <div class="row"><button type="button" class="btn" id="h-run"><span lang="ru">Запустить 6 тактов</span><span lang="en">Run 6 beats</span></button></div>
+    <div class="hb" id="hb"></div>
+  </section>
+
+  <section class="station">
+    <header>
+      <span class="eyebrow">WebSocket close codes · RFC 6455</span>
+      <h2 lang="ru">Коды закрытия, которые проверяют тесты</h2><h2 lang="en">The close codes the tests check</h2>
+    </header>
+    <div class="cc" id="cc"></div>
+    <div class="note" id="cc-note" aria-live="polite"></div>
+  </section>
+
+  <section class="station">
+    <header>
+      <span class="eyebrow">text/event-stream</span>
+      <h2 lang="ru">Из чего состоит поток SSE</h2><h2 lang="en">What an SSE stream is made of</h2>
+      <p class="muted" lang="ru">Нажмите на строку. Пустая строка завершает событие, строка с двоеточием в начале — комментарий.</p>
+      <p class="muted" lang="en">Pick a line. A blank line ends an event; a line starting with a colon is a comment.</p>
+    </header>
+    <div class="anat"><div class="lines" id="lines"></div><div class="note" id="line-note" aria-live="polite"></div></div>
+  </section>
+
+  <section class="station">
+    <header>
+      <span class="eyebrow" lang="ru">Мутационная проверка</span><span class="eyebrow" lang="en">Mutation check</span>
+      <h2 lang="ru">14 багов, внесённых нарочно</h2><h2 lang="en">14 bugs planted on purpose</h2>
+    </header>
+    <div class="mut" id="mut"></div>
+  </section>
+
+  <section class="station">
+    <header>
+      <span class="eyebrow" lang="ru">Словарь</span><span class="eyebrow" lang="en">Glossary</span>
+      <h2 lang="ru">Слова, которые услышите</h2><h2 lang="en">Words you will hear</h2>
+    </header>
+    <dl class="terms" id="terms"></dl>
+  </section>
+
+  <section class="station">
+    <header>
+      <span class="eyebrow" lang="ru">Запуск</span><span class="eyebrow" lang="en">Run it</span>
+      <h2 lang="ru">Команды</h2><h2 lang="en">Commands</h2>
+    </header>
+    <div style="display:grid;gap:8px" id="cmds"></div>
+  </section>
+
+  <footer>
+    <a href="https://github.com/NailKarimov/api-protocols-testing">github.com/NailKarimov/api-protocols-testing</a>
+    <a href="https://github.com/NailKarimov/api-protocols-testing/blob/main/docs/realtime.md">docs/realtime.md</a>
+    <a href="https://nailkarimov.github.io/api-protocols-testing/grpc.html">gRPC guide</a>
+    <a href="https://nailkarimov.github.io/api-protocols-testing/">Allure report</a>
+  </footer>
+</div>
+
+<script>
+const S = { lang: 'ru' };
+const L = (ru, en) => (S.lang === 'ru' ? ru : en);
+const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+function seeded(seed) { let a = seed >>> 0; return () => { a = (a + 0x6d2b79f5) >>> 0; let t = a; t = Math.imul(t ^ (t >>> 15), t | 1); t ^= t + Math.imul(t ^ (t >>> 7), t | 61); return ((t ^ (t >>> 14)) >>> 0) / 4294967296; }; }
+
+/* twin tapes */
+let tTimer = null;
+const WS_HEAD = ['GET /ws HTTP/1.1', 'Upgrade: websocket', 'Authorization: Bearer ***', 'Sec-WebSocket-Protocol: quotes.v1', '', 'HTTP/1.1 101 Switching Protocols', 'Sec-WebSocket-Protocol: quotes.v1', ''];
+function runTapes() {
+  clearInterval(tTimer);
+  const rnd = seeded(7); let mid = 108500, seq = 41;
+  const ws = [...WS_HEAD.map((l) => `<span class="hs">${esc(l)}</span>`), `<span class="fr">→ {"type":"subscribe","pairs":["EURUSD"]}</span>`, `<span class="fr">← {"type":"subscribed","pairs":["EURUSD"]}</span>`];
+  const sse = ['<span class="hs">HTTP/1.1 200 OK</span>', '<span class="hs">Content-Type: text/event-stream</span>', '<span class="hs">Cache-Control: no-cache</span>', '', '<span class="k">retry:</span> 1000', ''];
+  const quote = () => { const spread = 10 + Math.floor(rnd() * 21), bid = mid - Math.floor(spread / 2); return { bid: (bid / 1e5).toFixed(5), ask: ((bid + spread) / 1e5).toFixed(5), seq }; };
+  const add = (q, n) => {
+    const j = `{"type":"quote","pair":"EURUSD","bid":"${q.bid}","ask":"${q.ask}","seq":${q.seq}}`;
+    ws.push(`<span class="fr new">← ${esc(j)}</span>`);
+    sse.push(`<span class="k">event:</span> quote`, `<span class="k">id:</span> EURUSD=${q.seq}`, `<span class="k">data:</span> ${esc(j)}`, '');
+    if (n % 4 === 3) { ws.push('<span class="cm">← (ping frame)  → (pong frame)</span>'); sse.push('<span class="cm">: ping</span>', ''); }
+  };
+  const draw = () => {
+    const a = document.getElementById('t-ws'), b = document.getElementById('t-sse');
+    a.innerHTML = ws.join('\n'); b.innerHTML = sse.join('\n');
+    a.scrollTop = a.scrollHeight; b.scrollTop = b.scrollHeight;
+    ws.forEach((l, i) => (ws[i] = l.replace(' new', ''))); 
+  };
+  add(quote(), 0); draw();
+  let n = 1;
+  const step = () => { mid += Math.round((rnd() - 0.5) * 10); seq++; add(quote(), n++); draw(); };
+  if (reduce) { for (let i = 0; i < 8; i++) step(); return; }
+  tTimer = setInterval(() => { step(); if (n > 14) clearInterval(tTimer); }, 500);
+}
+document.getElementById('t-run').addEventListener('click', runTapes);
+const CMP = [
+  [['Направление', 'Direction'], ['в обе стороны', 'both ways'], ['только сервер → клиент', 'server → client only']],
+  [['Начало', 'Starts as'], ['HTTP с Upgrade, потом свои кадры', 'HTTP with Upgrade, then its own frames'], ['обычный GET, который не кончается', 'a plain GET that never ends']],
+  [['Переподключение', 'Reconnect'], ['пишет приложение (since)', 'the app does it (since)'], ['встроено в браузер (Last-Event-ID, retry)', 'built into the browser (Last-Event-ID, retry)']],
+  [['Мёртвое соединение', 'Dead connection'], ['ping / pong кадры', 'ping / pong frames'], ['комментарии-heartbeat для прокси', 'heartbeat comments for proxies']],
+  [['Где встречается', 'Where you meet it'], ['чаты, торговые терминалы, игры', 'chats, trading terminals, games'], ['уведомления, дашборды, стриминг ответа LLM', 'notifications, dashboards, LLM token streaming']],
+];
+function renderCmp() {
+  document.getElementById('cmp').innerHTML = `<thead><tr><th></th><th>WebSocket</th><th>SSE</th></tr></thead><tbody>${CMP.map((r) => `<tr><th>${L(...r[0])}</th><td>${L(...r[1])}</td><td>${L(...r[2])}</td></tr>`).join('')}</tbody>`;
+}
+
+/* resume */
+let R;
+function rReset() { R = { cells: [], seq: 56, state: 'live', lastSeen: null, done: false }; for (let i = 0; i < 6; i++) { R.seq++; R.cells.push({ seq: R.seq, cls: 'got' }); } R.lastSeen = R.seq; renderR(); }
+function renderR() {
+  document.getElementById('r-strip').innerHTML = R.cells.map((c) => c.cls === 'reset' ? `<span class="reset">reset</span>` : `<span class="${c.cls}">${c.seq}</span>`).join('');
+  const v = document.getElementById('r-verdict');
+  const lost = R.cells.filter((c) => c.cls === 'miss').length;
+  const replay = R.cells.filter((c) => c.cls === 'replay').length;
+  if (R.state === 'live' && !R.done) { v.className = 'verdict ok'; v.innerHTML = `<b>${L('на связи', 'connected')} · ${L('последний seq', 'last seq')} ${R.lastSeen}</b><span>${L('Нажмите «Оборвать связь».', 'Press “Drop the connection”.')}</span>`; return; }
+  if (R.state === 'off') { v.className = 'verdict bad'; v.innerHTML = `<b>${L('офлайн', 'offline')} · ${L('рынок ушёл до seq', 'the market is at seq')} ${R.seq}</b><span>${L('Клиент помнит последний seq', 'The client remembers its last seq')} ${R.lastSeen}. ${L('Нажмите «Переподключиться».', 'Press “Reconnect”.')}</span>`; return; }
+  if (R.cells.some((c) => c.cls === 'reset')) { v.className = 'verdict ok'; v.innerHTML = `<b>event: reset → ${L('свежий снимок', 'a fresh snapshot')}</b><span>${L('Пропущенное уже вытеснено из истории. Сервер честно говорит «reset», клиент перерисовывает экран с нуля. Тест: since older than the history → reset.', 'The missed part has left the history. The server says “reset” honestly and the client redraws from scratch. Test: since older than the history → reset.')}</span>`; return; }
+  if (lost) { v.className = 'verdict bad'; v.innerHTML = `<b>seqGaps = ${L('пропуск', 'gap')} ${R.lastSeen} → ${R.lastSeen + lost + 1} · ${lost} ${L('цен потеряно', 'prices lost')}</b><span>${L('Без since сервер шлёт только текущую цену. Клиент не знает, что пропустил. Это внесённые баги R1 и R2.', 'Without since the server sends only the current price; the client never learns what it missed. Planted bugs R1 and R2.')}</span>`; return; }
+  v.className = 'verdict ok'; v.innerHTML = `<b>${L('дослано', 'replayed')} ${replay} · seqGaps = []</b><span>${L('Первый досланный seq = последний + 1, ничего не пришло дважды. Это тест reconnect with since / Last-Event-ID.', 'The first replayed seq is last + 1 and nothing came twice: the reconnect with since / Last-Event-ID test.')}</span>`;
+}
+let rTimer = null;
+document.getElementById('r-drop').addEventListener('click', () => {
+  if (R.state !== 'live' || R.done) return;
+  R.state = 'off';
+  let k = 0;
+  clearInterval(rTimer);
+  const tick = () => { R.seq++; R.cells.push({ seq: R.seq, cls: 'off' }); renderR(); };
+  if (reduce) { for (let i = 0; i < 7; i++) tick(); return; }
+  rTimer = setInterval(() => { tick(); if (++k >= 7) clearInterval(rTimer); }, 250);
+});
+document.getElementById('r-back').addEventListener('click', () => {
+  if (R.state !== 'off') return;
+  clearInterval(rTimer);
+  const since = document.getElementById('r-since').checked, short = document.getElementById('r-short').checked;
+  const offline = R.cells.filter((c) => c.cls === 'off');
+  if (since && short && offline.length > 5) { R.cells = R.cells.filter((c) => c.cls !== 'off'); R.cells.push({ cls: 'reset' }); }
+  else offline.forEach((c, i) => (c.cls = since ? 'replay' : i === offline.length - 1 ? 'got' : 'miss'));
+  R.state = 'live'; R.done = true; R.lastSeen = R.seq;
+  for (let i = 0; i < 3; i++) { R.seq++; R.cells.push({ seq: R.seq, cls: 'got' }); }
+  renderR();
+});
+document.getElementById('r-reset').addEventListener('click', rReset);
+
+/* heartbeat */
+let hTimer = null;
+function renderHb(beat) {
+  const rows = [
+    { name: L('Здоровый клиент', 'Healthy client'), silent: false },
+    { name: L('Телефон в тоннеле', 'Phone in a tunnel'), silent: true, from: 2 },
+  ];
+  document.getElementById('hb').innerHTML = rows.map((r) => {
+    const parts = []; let dead = false, missed = 0;
+    for (let i = 0; i < beat; i++) {
+      if (dead) break;
+      const silentNow = r.silent && i >= r.from;
+      if (missed > 0 && silentNow) { parts.push('<span class="term">terminate</span>'); dead = true; break; }
+      parts.push('<span class="ping">ping</span>');
+      if (silentNow) { parts.push('<span class="missed">—</span>'); missed++; } else parts.push('<span class="pong">pong</span>');
+    }
+    return `<div class="hbrow"><b>${r.name}</b><div class="beats">${parts.join('')}</div><span class="state ${dead ? 'dead' : 'open'}">${dead ? L('отключён · 1006', 'dropped · 1006') : 'open'}</span></div>`;
+  }).join('') + `<p class="muted" style="font-size:14px">${L('Тест: клиент с выключенным autoPong закрыт с кодом 1006 (без close-кадра), счётчик wsTerminatedForSilence вырос, здоровый клиент открыт и видел ping.', 'Test: a client with autoPong off is closed with 1006 (no close frame), wsTerminatedForSilence went up, the healthy client stays open and saw pings.')}</p>`;
+}
+document.getElementById('h-run').addEventListener('click', () => {
+  clearInterval(hTimer); let b = 0; renderHb(0);
+  if (reduce) { renderHb(6); return; }
+  hTimer = setInterval(() => { renderHb(++b); if (b >= 6) clearInterval(hTimer); }, 450);
+});
+
+/* close codes */
+const CC = [
+  [1000, ['Обычное закрытие', 'Normal closure'], ['Клиент закончил работу: так закрываются все клиенты после теста.', 'The client is done: how every test client closes.']],
+  [1001, ['Уходим', 'Going away'], ['Сервер останавливается. Тест: при shutdown каждый клиент получает 1001 с причиной «server shutting down», а не обрыв.', 'The server is stopping. Test: on shutdown every client gets 1001 “server shutting down”, not a cut.']],
+  [1002, ['Ошибка протокола', 'Protocol error'], ['Клиент не предложил подпротокол quotes.v1, сервер не знает, на каком языке с ним говорить.', 'The client offered no quotes.v1 subprotocol, so the server does not know which language to speak.']],
+  [1006, ['Обрыв без close-кадра', 'Abnormal, no close frame'], ['Его нельзя отправить, только получить. Так выглядит отключение молчащего клиента и обрыв сети.', 'Never sent, only observed: a silent client cut off, or the network gone.']],
+  [1008, ['Нарушение правил', 'Policy violation'], ['5-е плохое сообщение подряд. Первые четыре получают error, соединение остаётся.', 'The 5th bad message. The first four get an error and the socket stays.']],
+  [1009, ['Сообщение слишком большое', 'Message too big'], ['Кадр больше 4 КиБ. Защита от того, чтобы один клиент съел память сервера.', 'A frame over 4 KiB. Keeps one client from eating the server’s memory.']],
+];
+let ccSel = 1008;
+function renderCc() {
+  document.getElementById('cc').innerHTML = CC.map((c) => `<button type="button" class="ccb" data-c="${c[0]}" aria-pressed="${c[0] === ccSel}"><b>${c[0]}</b><small>${L(...c[1])}</small></button>`).join('');
+  const c = CC.find((x) => x[0] === ccSel);
+  document.getElementById('cc-note').innerHTML = `<b><code>${c[0]}</code> · ${L(...c[1])}</b><span>${L(...c[2])}</span>`;
+}
+document.getElementById('cc').addEventListener('click', (e) => { const b = e.target.closest('[data-c]'); if (b) { ccSel = +b.dataset.c; renderCc(); } });
+
+/* sse anatomy */
+const LINES = [
+  ['retry: 1000', ['Сколько миллисекунд браузер ждёт перед переподключением. Тест: retry пришёл первым и равен 1000.', 'How many milliseconds the browser waits before reconnecting. Test: retry comes first and is 1000.']],
+  ['', ['Пустая строка: конец блока.', 'A blank line: end of a block.']],
+  ['event: quote', ['Тип события. В браузере — addEventListener("quote"). Без event: тип «message».', 'The event type, addEventListener("quote") in a browser. Without event: the type is “message”.']],
+  ['id: EURUSD=57,USDJPY=33', ['Курсор всех пар сразу. Браузер запомнит его и при переподключении пришлёт в Last-Event-ID. Баг R3 писал сюда только последнюю пару.', 'A cursor of every pair. The browser keeps it and sends it back as Last-Event-ID on reconnect. Bug R3 wrote only the last pair here.']],
+  ['data: {"type":"quote","pair":"EURUSD","seq":57,…}', ['Полезная нагрузка. Несколько строк data: склеиваются через перевод строки.', 'The payload. Several data: lines are joined with newlines.']],
+  ['', ['Пустая строка завершает событие: только теперь клиент его отдаёт.', 'The blank line ends the event: only now does the client dispatch it.']],
+  [': ping', ['Комментарий: клиент его игнорирует, но прокси видят трафик и не рвут «молчащее» соединение.', 'A comment: the client ignores it, but proxies see traffic and do not cut a “silent” connection.']],
+];
+let lineSel = 3;
+function renderLines() {
+  document.getElementById('lines').innerHTML = LINES.map((l, i) => `<button type="button" class="${l[0] ? '' : 'blank'}" data-i="${i}" aria-pressed="${i === lineSel}">${l[0] ? esc(l[0]) : L('(пустая строка)', '(blank line)')}</button>`).join('');
+  document.getElementById('line-note').innerHTML = `<b><code>${esc(LINES[lineSel][0] || '\\n')}</code></b><span>${L(...LINES[lineSel][1])}</span>`;
+}
+document.getElementById('lines').addEventListener('click', (e) => { const b = e.target.closest('[data-i]'); if (b) { lineSel = +b.dataset.i; renderLines(); } });
+
+const MUT = [
+  [['SSE игнорирует Last-Event-ID', 'SSE ignores Last-Event-ID'], 'SSE resume + reset (2)'],
+  [['WebSocket игнорирует since', 'WebSocket ignores since'], 'WebSocket resume + reset (2)'],
+  [['id SSE называет только последнюю пару', 'SSE id names only the last pair'], 'every event id is a cursor of all pairs (+1)'],
+  [['молчащих клиентов не отключают', 'silent clients never dropped'], 'heartbeat: a client that never answers pings …'],
+  [['закрытая вкладка SSE держит подписку', 'a closed SSE tab keeps its listener'], 'a closed tab releases the server-side subscription'],
+  [['закрытый WebSocket держит подписку', 'a closed WebSocket keeps its listener'], 'closed clients release their subscriptions'],
+  [['плохие сообщения не закрывают сокет', 'bad messages never close the socket'], 'the 5th bad message closes … 1008'],
+  [['рукопожатие без проверки токена', 'handshake without authentication'], 'handshake without a token → HTTP 401'],
+  [['unsubscribe ничего не делает', 'unsubscribe does nothing'], 'unsubscribe: no more quotes of that pair'],
+  [['SSE без heartbeat', 'SSE without heartbeats'], 'heartbeat comments keep an idle connection alive'],
+  [['SSE отдаётся как text/plain', 'SSE served as text/plain'], '8 tests'],
+  [['нет 1001 при остановке', 'no 1001 on shutdown'], 'server shutdown: clients get 1001 going away'],
+  [['устаревший since без reset', 'stale since replayed without reset'], 'since older than the history → reset'],
+  [['нет лимита размера кадра', 'no frame size limit'], 'a frame over 4 KiB closes … 1009'],
+];
+function renderMut() { document.getElementById('mut').innerHTML = MUT.map((m) => `<div class="mrow"><span>${L(...m[0])}</span><code>${esc(m[1])}</code><span class="kill">${L('пойман', 'caught')}</span></div>`).join(''); }
+const TERMS = [
+  ['WebSocket', ['Постоянное двустороннее соединение поверх TCP. Начинается как HTTP-запрос с Upgrade.', 'A lasting two-way connection over TCP that starts as an HTTP request with Upgrade.']],
+  ['Server-Sent Events', ['Односторонний поток текста от сервера по обычному HTTP. В браузере — EventSource.', 'A one-way text stream from the server over plain HTTP; EventSource in a browser.']],
+  ['Subprotocol', ['Имя языка сообщений внутри WebSocket (здесь quotes.v1). Договариваются при рукопожатии.', 'The name of the message language inside a WebSocket (quotes.v1 here), agreed in the handshake.']],
+  ['Heartbeat', ['Регулярный сигнал «я жив»: ping/pong в WebSocket, комментарий в SSE.', 'A regular “still here” signal: ping/pong in WebSocket, a comment in SSE.']],
+  ['Half-open connection', ['Соединение, которое одна сторона считает открытым, а другой уже нет. Находится только heartbeat.', 'A connection one side thinks is open while the other is gone. Only a heartbeat finds it.']],
+  ['Resume / replay', ['Досылка того, что клиент пропустил, по последнему увиденному seq или id.', 'Sending what the client missed, from the last seq or id it saw.']],
+  ['Fan-out', ['Одно обновление расходится многим подписчикам. Тест: 20 клиентов видят одинаковые цены.', 'One update goes to many subscribers. Test: 20 clients see identical prices.']],
+  ['Close code', ['Число в close-кадре WebSocket: 1000 норма, 1001 уход, 1008 правила, 1009 размер…', 'The number in a WebSocket close frame: 1000 normal, 1001 going away, 1008 policy, 1009 size…']],
+];
+function renderTerms() { document.getElementById('terms').innerHTML = TERMS.map((t) => `<div><dt>${t[0]}</dt><dd>${L(...t[1])}</dd></div>`).join(''); }
+const CMDS = ['npm run test:realtime', 'npm run quotes:dev', "curl -N -H 'Authorization: Bearer dev-token' 'http://localhost:8080/sse?pairs=EURUSD,USDJPY'", "websocat -H 'Authorization: Bearer dev-token' --protocol quotes.v1 ws://localhost:8080/ws"];
+function renderCmds() { document.getElementById('cmds').innerHTML = CMDS.map((c, i) => `<div class="cmd"><code id="cmd-${i}">${esc(c)}</code><button type="button" data-c="${i}">${L('Копировать', 'Copy')}</button></div>`).join(''); }
+document.getElementById('cmds').addEventListener('click', (e) => {
+  const b = e.target.closest('[data-c]'); if (!b) return;
+  const done = () => { b.textContent = L('Скопировано', 'Copied'); setTimeout(() => (b.textContent = L('Копировать', 'Copy')), 1500); };
+  const fallback = () => { const r = document.createRange(); r.selectNodeContents(document.getElementById('cmd-' + b.dataset.c)); const s = getSelection(); s.removeAllRanges(); s.addRange(r); };
+  try { navigator.clipboard.writeText(CMDS[+b.dataset.c]).then(done, fallback); } catch (err) { fallback(); }
+});
+
+function renderAll() { renderCmp(); renderR(); renderHb(6); renderCc(); renderLines(); renderMut(); renderTerms(); renderCmds(); runTapes(); }
+function setLang(l) {
+  S.lang = l; document.body.dataset.lang = l; document.documentElement.lang = l;
+  document.getElementById('lang-ru').setAttribute('aria-pressed', l === 'ru');
+  document.getElementById('lang-en').setAttribute('aria-pressed', l === 'en');
+  try { localStorage.setItem('realtime-lang', l); } catch (e) {}
+  renderAll();
+}
+document.querySelectorAll('.seg button').forEach((b) => b.addEventListener('click', () => setLang(b.dataset.l)));
+let start = 'ru';
+try { start = localStorage.getItem('realtime-lang') || document.documentElement.dataset.defaultLang || 'ru'; } catch (e) { start = document.documentElement.dataset.defaultLang || 'ru'; }
+rReset();
+setLang(start);
+</script>
+</body>
+</html>

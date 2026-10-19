@@ -19,7 +19,8 @@
     "prepare": "husky",
     "proto:lint": "buf lint && buf format --diff --exit-code",
     "proto:approve": "buf build -o contracts/quotes.v1.binpb",
-    "test:contract": "playwright test --project=contract"
+    "test:contract": "playwright test --project=contract",
+    "test:realtime": "playwright test --project=realtime"
   },
   "lint-staged": {
     "*.{ts,mjs,js}": [

@@ -4,11 +4,11 @@
 [![Allure report](https://img.shields.io/badge/report-Allure-orange)](https://nailkarimov.github.io/api-protocols-testing/)
 
 Testing APIs beyond REST. One FX quotes service of our own (EUR/USD, USD/JPY…) serves the same live feed over
-**gRPC**, and next over **WebSocket** and **Server-Sent Events**, so the tests compare the protocols on the same data.
+**gRPC**, **WebSocket** and **Server-Sent Events**, so the tests compare the protocols on the same data.
 
 - **System under test:** `services/quotes`: a seeded random-walk quote feed (same seed, same prices) and a gRPC
   server for `proto/quotes/v1/quotes.proto`: unary, server streaming, client streaming and bidirectional streaming,
-  plus the standard health and reflection services.
+  plus the standard health and reflection services; and an HTTP server with WebSocket `/ws` and SSE `/sse`.
 - **In-process per worker:** every Playwright worker starts its own feed and server on a free port; no Docker needed.
 - **The .proto is the contract:** `buf lint` and `buf breaking` against an approved snapshot, in CI and on every PR.
 
@@ -28,8 +28,18 @@ with 5 decimals, no request size limit): all 12 caught. `buf lint` itself found 
 RPCs shared request and response messages, so none of them could evolve alone. Details: [`docs/grpc.md`](docs/grpc.md) ·
 visual guide: [`docs/grpc.html`](https://nailkarimov.github.io/api-protocols-testing/grpc.html).
 
-**Next:** WebSocket and SSE on the same feed: subscribe, order of messages, heartbeats, reconnect and resume
-without gaps.
+## WebSocket and SSE (32 tests)
+
+| Spec                      | What it proves                                                                                                                                                                                                                                                                                                                                                                                                             |
+| ------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `realtime/websocket`      | handshake: 401 before the upgrade, subprotocol `quotes.v1` (none → 1002); ack, snapshot, no seq gaps; 6 bad messages answered while the socket stays, the 5th → 1008; 5 KiB frame → 1009; unsubscribe; **drop and resume with `since`: nothing missed, nothing twice**; stale `since` → reset; a client that never pongs is dropped; shutdown → 1001; 20 clients see identical prices; closed clients free their listeners |
+| `realtime/sse`            | SSE headers, `retry`, an id that is a cursor of all pairs; **resume with `Last-Event-ID`**; stale cursor → reset; heartbeat comments; 401 / 406 / 400 / 404 as JSON; closed tabs free their listeners; shutdown ends the stream                                                                                                                                                                                            |
+| `realtime/cross-protocol` | gRPC, WebSocket and SSE report the same bid/ask for every common seq                                                                                                                                                                                                                                                                                                                                                       |
+
+14 bugs planted in the WebSocket and SSE server (resume ignored, a cursor naming one pair, silent clients never
+dropped, leaked listeners, no 1001 on shutdown, …): all 14 caught. Details: [`docs/realtime.md`](docs/realtime.md) ·
+visual guide with a connection you cut and resume:
+[`docs/realtime.html`](https://nailkarimov.github.io/api-protocols-testing/realtime.html).
 
 ## Running it
 
@@ -37,10 +47,12 @@ without gaps.
 npm ci
 npm test                 # everything
 npm run test:grpc        # gRPC only
+npm run test:realtime   # WebSocket and SSE
 npm run test:contract    # buf breaking against contracts/quotes.v1.binpb
 npm run proto:lint       # buf lint + format check
-npm run quotes:dev       # the server by hand on :50051, then for example:
+npm run quotes:dev       # by hand: gRPC on :50051, WebSocket and SSE on :8080, then for example:
 grpcurl -plaintext -H 'authorization: Bearer dev-token' -d '{"pair":"EURUSD"}' localhost:50051 quotes.v1.QuoteService/GetQuote
+curl -N -H 'Authorization: Bearer dev-token' 'http://localhost:8080/sse?pairs=EURUSD,USDJPY'
 ```
 
 A deliberate contract change: edit the `.proto`, run `npm run proto:approve`, commit both files.
@@ -53,5 +65,6 @@ microservices: [microservices-testing](https://github.com/NailKarimov/microservi
 database and OAuth 2.0: [ledger-api-testing](https://github.com/NailKarimov/ledger-api-testing) ·
 overview: [github.com/NailKarimov](https://github.com/NailKarimov).
 
-**Stack:** TypeScript · gRPC (`@grpc/grpc-js`, proto-loader, health, reflection) · Protocol Buffers · buf · Playwright
+**Stack:** TypeScript · gRPC (`@grpc/grpc-js`, proto-loader, health, reflection) · Protocol Buffers · buf · WebSocket
+(`ws`) · Server-Sent Events · Playwright
 Test · zod · Allure · GitHub Actions.

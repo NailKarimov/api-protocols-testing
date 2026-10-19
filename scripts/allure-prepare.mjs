@@ -13,7 +13,7 @@ const lines = {
   Run: env.CI ? 'GitHub Actions' : 'local',
   Branch: env.GITHUB_REF_NAME ?? 'local',
   Commit: (env.GITHUB_SHA ?? 'local').slice(0, 7),
-  Servers: 'in-process per worker (gRPC)',
+  Servers: 'in-process per worker (gRPC, WebSocket, SSE)',
   'Feed seed': env.QUOTES_SEED ?? '7',
 };
 writeFileSync(

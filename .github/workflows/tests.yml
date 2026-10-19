@@ -68,7 +68,7 @@ jobs:
       - name: Keep other reports and add the visual guides to GitHub Pages
         if: always()
         run: |
-          cp docs/grpc.html allure-report/
+          for f in docs/*.html; do cp "$f" allure-report/; done
           true
 
       - name: Publish Allure report to GitHub Pages
