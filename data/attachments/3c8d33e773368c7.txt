@@ -1,0 +1,22 @@
+Subscribe  (272 ms)
+Call options: {"token":"***"}
+Request: {"pairs":["EURGBP"],"max_updates":15}
+Status: OK OK
+Headers: {"content-type":"application/grpc+proto","date":"Mon, 19 Oct 2026 16:59:59 GMT"}
+Trailers: {}
+Messages (15):
+  {"pair":"EURGBP","bid":"0.85393","ask":"0.85420","seq":9,"time":{"seconds":1792429199,"nanos":91000000}}
+  {"pair":"EURGBP","bid":"0.85397","ask":"0.85424","seq":10,"time":{"seconds":1792429199,"nanos":112000000}}
+  {"pair":"EURGBP","bid":"0.85398","ask":"0.85424","seq":11,"time":{"seconds":1792429199,"nanos":132000000}}
+  {"pair":"EURGBP","bid":"0.85395","ask":"0.85422","seq":12,"time":{"seconds":1792429199,"nanos":153000000}}
+  {"pair":"EURGBP","bid":"0.85394","ask":"0.85416","seq":13,"time":{"seconds":1792429199,"nanos":172000000}}
+  {"pair":"EURGBP","bid":"0.85394","ask":"0.85414","seq":14,"time":{"seconds":1792429199,"nanos":193000000}}
+  {"pair":"EURGBP","bid":"0.85392","ask":"0.85410","seq":15,"time":{"seconds":1792429199,"nanos":213000000}}
+  {"pair":"EURGBP","bid":"0.85395","ask":"0.85413","seq":16,"time":{"seconds":1792429199,"nanos":234000000}}
+  {"pair":"EURGBP","bid":"0.85398","ask":"0.85417","seq":17,"time":{"seconds":1792429199,"nanos":254000000}}
+  {"pair":"EURGBP","bid":"0.85399","ask":"0.85418","seq":18,"time":{"seconds":1792429199,"nanos":274000000}}
+  {"pair":"EURGBP","bid":"0.85395","ask":"0.85419","seq":19,"time":{"seconds":1792429199,"nanos":293000000}}
+  {"pair":"EURGBP","bid":"0.85398","ask":"0.85414","seq":20,"time":{"seconds":1792429199,"nanos":315000000}}
+  {"pair":"EURGBP","bid":"0.85397","ask":"0.85423","seq":21,"time":{"seconds":1792429199,"nanos":335000000}}
+  {"pair":"EURGBP","bid":"0.85402","ask":"0.85425","seq":22,"time":{"seconds":1792429199,"nanos":356000000}}
+  {"pair":"EURGBP","bid":"0.85403","ask":"0.85424","seq":23,"time":{"seconds":1792429199,"nanos":376000000}}

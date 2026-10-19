@@ -1,8 +1,0 @@
-ws://127.0.0.1:44359/ws  (Authorization: Bearer ***)
-16:29:36.108 open (subprotocol quotes.v1)
-16:29:36.108 → 42
-16:29:36.108 → {"type":"ping","id":1}
-16:29:36.108 ← {"type":"error","code":"bad_json","message":"the message must be an object"}
-16:29:36.108 ← {"type":"pong","id":1}
-16:29:36.285 ← ping
-16:29:36.288 close 1000 bye
