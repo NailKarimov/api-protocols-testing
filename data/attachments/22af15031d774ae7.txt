@@ -1,8 +1,0 @@
-ws://127.0.0.1:45965/ws  (Authorization: Bearer ***)
-17:00:03.038 open (subprotocol quotes.v1)
-17:00:03.038 → {"type":"buy"}
-17:00:03.038 → {"type":"ping","id":1}
-17:00:03.039 ← {"type":"error","code":"unknown_type","message":"unknown message type \"buy\""}
-17:00:03.039 ← {"type":"pong","id":1}
-17:00:03.221 ← ping
-17:00:03.223 close 1000 bye

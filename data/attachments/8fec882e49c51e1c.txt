@@ -1,7 +1,0 @@
-GetQuote  (200 ms)
-Call options: {"delayMs":2000,"deadlineMs":200,"token":"***"}
-Request: {"pair":"EURUSD","delay_ms":2000}
-Status: DEADLINE_EXCEEDED Deadline exceeded after 0.199s,LB pick: 0.001s,remote_addr=127.0.0.1:38909
-Headers: {"content-type":"application/grpc+proto","date":"Mon, 19 Oct 2026 17:00:00 GMT"}
-Trailers: {}
-Messages (0):
