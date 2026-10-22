@@ -1,0 +1,11 @@
+Trade  (4 ms)
+Call options: {"token":"***"}
+Request: {"orders":4,"first":[{"client_order_id":"t1","pair":"EURUSD","side":"SIDE_BUY","amount":"1000.00"},{"client_order_id":"t2","pair":"EURUSD","side":"SIDE_SELL","amount":"1000.00"},{"client_order_id":"t3","pair":"USDJPY","side":"SIDE_BUY","amount":"1000.00"}]}
+Status: OK OK
+Headers: {"content-type":"application/grpc+proto","date":"Thu, 22 Oct 2026 08:06:19 GMT"}
+Trailers: {}
+Messages (4):
+  {"client_order_id":"t1","accepted":true,"price":"1.08516","reason":"","quote_seq":41}
+  {"client_order_id":"t2","accepted":true,"price":"1.08494","reason":"","quote_seq":41}
+  {"client_order_id":"t3","accepted":true,"price":"151.187","reason":"","quote_seq":41}
+  {"client_order_id":"t4","accepted":true,"price":"1.26986","reason":"","quote_seq":41}
