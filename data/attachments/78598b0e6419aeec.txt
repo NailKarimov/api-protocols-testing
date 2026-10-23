@@ -1,0 +1,47 @@
+Subscribe  (784 ms)
+Call options: {"token":"***"}
+Request: {"pairs":["EURUSD"],"max_updates":40}
+Status: OK OK
+Headers: {"content-type":"application/grpc+proto","date":"Fri, 23 Oct 2026 17:23:49 GMT"}
+Trailers: {}
+Messages (40):
+  {"pair":"EURUSD","bid":"1.08476","ask":"1.08504","seq":3,"time":{"seconds":1792776229,"nanos":276000000}}
+  {"pair":"EURUSD","bid":"1.08480","ask":"1.08503","seq":4,"time":{"seconds":1792776229,"nanos":297000000}}
+  {"pair":"EURUSD","bid":"1.08485","ask":"1.08495","seq":5,"time":{"seconds":1792776229,"nanos":317000000}}
+  {"pair":"EURUSD","bid":"1.08480","ask":"1.08497","seq":6,"time":{"seconds":1792776229,"nanos":337000000}}
+  {"pair":"EURUSD","bid":"1.08476","ask":"1.08505","seq":7,"time":{"seconds":1792776229,"nanos":357000000}}
+  {"pair":"EURUSD","bid":"1.08482","ask":"1.08509","seq":8,"time":{"seconds":1792776229,"nanos":377000000}}
+  {"pair":"EURUSD","bid":"1.08487","ask":"1.08508","seq":9,"time":{"seconds":1792776229,"nanos":397000000}}
+  {"pair":"EURUSD","bid":"1.08488","ask":"1.08502","seq":10,"time":{"seconds":1792776229,"nanos":417000000}}
+  {"pair":"EURUSD","bid":"1.08482","ask":"1.08512","seq":11,"time":{"seconds":1792776229,"nanos":438000000}}
+  {"pair":"EURUSD","bid":"1.08487","ask":"1.08508","seq":12,"time":{"seconds":1792776229,"nanos":458000000}}
+  {"pair":"EURUSD","bid":"1.08486","ask":"1.08511","seq":13,"time":{"seconds":1792776229,"nanos":479000000}}
+  {"pair":"EURUSD","bid":"1.08488","ask":"1.08509","seq":14,"time":{"seconds":1792776229,"nanos":498000000}}
+  {"pair":"EURUSD","bid":"1.08480","ask":"1.08508","seq":15,"time":{"seconds":1792776229,"nanos":519000000}}
+  {"pair":"EURUSD","bid":"1.08485","ask":"1.08509","seq":16,"time":{"seconds":1792776229,"nanos":538000000}}
+  {"pair":"EURUSD","bid":"1.08486","ask":"1.08501","seq":17,"time":{"seconds":1792776229,"nanos":559000000}}
+  {"pair":"EURUSD","bid":"1.08480","ask":"1.08507","seq":18,"time":{"seconds":1792776229,"nanos":578000000}}
+  {"pair":"EURUSD","bid":"1.08479","ask":"1.08509","seq":19,"time":{"seconds":1792776229,"nanos":599000000}}
+  {"pair":"EURUSD","bid":"1.08487","ask":"1.08505","seq":20,"time":{"seconds":1792776229,"nanos":618000000}}
+  {"pair":"EURUSD","bid":"1.08487","ask":"1.08502","seq":21,"time":{"seconds":1792776229,"nanos":638000000}}
+  {"pair":"EURUSD","bid":"1.08482","ask":"1.08503","seq":22,"time":{"seconds":1792776229,"nanos":659000000}}
+  {"pair":"EURUSD","bid":"1.08485","ask":"1.08505","seq":23,"time":{"seconds":1792776229,"nanos":678000000}}
+  {"pair":"EURUSD","bid":"1.08483","ask":"1.08499","seq":24,"time":{"seconds":1792776229,"nanos":699000000}}
+  {"pair":"EURUSD","bid":"1.08483","ask":"1.08507","seq":25,"time":{"seconds":1792776229,"nanos":718000000}}
+  {"pair":"EURUSD","bid":"1.08486","ask":"1.08497","seq":26,"time":{"seconds":1792776229,"nanos":739000000}}
+  {"pair":"EURUSD","bid":"1.08491","ask":"1.08502","seq":27,"time":{"seconds":1792776229,"nanos":759000000}}
+  {"pair":"EURUSD","bid":"1.08485","ask":"1.08506","seq":28,"time":{"seconds":1792776229,"nanos":779000000}}
+  {"pair":"EURUSD","bid":"1.08492","ask":"1.08507","seq":29,"time":{"seconds":1792776229,"nanos":800000000}}
+  {"pair":"EURUSD","bid":"1.08494","ask":"1.08505","seq":30,"time":{"seconds":1792776229,"nanos":820000000}}
+  {"pair":"EURUSD","bid":"1.08498","ask":"1.08508","seq":31,"time":{"seconds":1792776229,"nanos":841000000}}
+  {"pair":"EURUSD","bid":"1.08488","ask":"1.08510","seq":32,"time":{"seconds":1792776229,"nanos":861000000}}
+  {"pair":"EURUSD","bid":"1.08489","ask":"1.08504","seq":33,"time":{"seconds":1792776229,"nanos":882000000}}
+  {"pair":"EURUSD","bid":"1.08486","ask":"1.08510","seq":34,"time":{"seconds":1792776229,"nanos":901000000}}
+  {"pair":"EURUSD","bid":"1.08485","ask":"1.08509","seq":35,"time":{"seconds":1792776229,"nanos":922000000}}
+  {"pair":"EURUSD","bid":"1.08486","ask":"1.08509","seq":36,"time":{"seconds":1792776229,"nanos":941000000}}
+  {"pair":"EURUSD","bid":"1.08497","ask":"1.08508","seq":37,"time":{"seconds":1792776229,"nanos":962000000}}
+  {"pair":"EURUSD","bid":"1.08500","ask":"1.08513","seq":38,"time":{"seconds":1792776229,"nanos":981000000}}
+  {"pair":"EURUSD","bid":"1.08500","ask":"1.08516","seq":39,"time":{"seconds":1792776230,"nanos":2000000}}
+  {"pair":"EURUSD","bid":"1.08494","ask":"1.08515","seq":40,"time":{"seconds":1792776230,"nanos":21000000}}
+  {"pair":"EURUSD","bid":"1.08494","ask":"1.08516","seq":41,"time":{"seconds":1792776230,"nanos":42000000}}
+  {"pair":"EURUSD","bid":"1.08495","ask":"1.08510","seq":42,"time":{"seconds":1792776230,"nanos":63000000}}

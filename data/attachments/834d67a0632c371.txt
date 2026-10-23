@@ -1,7 +1,0 @@
-GetQuote  (3 ms)
-Call options: {"delayMs":10001,"token":"***"}
-Request: {"pair":"EURUSD","delay_ms":10001}
-Status: INVALID_ARGUMENT delay_ms must be 0 … 10000
-Headers: {"content-type":"application/grpc+proto","date":"Fri, 23 Oct 2026 08:04:43 GMT"}
-Trailers: {}
-Messages (0):

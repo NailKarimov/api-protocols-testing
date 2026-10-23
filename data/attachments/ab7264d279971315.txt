@@ -1,5 +1,0 @@
-http://127.0.0.1:45615/sse  (Authorization: Bearer ***)
-08:04:46.166 GET /sse?pairs=EURUSD,ABCDEF
-08:04:46.167 404 application/json
-08:04:46.167 {"code":"unknown_pair","message":"unknown pair ABCDEF"}
-08:04:46.168 (client closes the stream)
