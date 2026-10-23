@@ -1,0 +1,3 @@
+ws://127.0.0.1:45615/ws  (Authorization: Bearer ***)
+08:04:46.475 error Server sent no subprotocol
+08:04:46.475 close 1006 

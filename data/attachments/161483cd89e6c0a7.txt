@@ -1,5 +1,0 @@
-http://127.0.0.1:45505/sse  (Authorization: Bearer ***)
-08:06:22.063 GET /sse?pairs=EURUSD
-08:06:22.065 406 application/json
-08:06:22.065 {"code":"not_acceptable","message":"this endpoint only serves text/event-stream"}
-08:06:22.066 (client closes the stream)
