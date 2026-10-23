@@ -3,68 +3,88 @@
 [![Tests](https://github.com/NailKarimov/api-protocols-testing/actions/workflows/tests.yml/badge.svg)](https://github.com/NailKarimov/api-protocols-testing/actions/workflows/tests.yml)
 [![Allure report](https://img.shields.io/badge/report-Allure-orange)](https://nailkarimov.github.io/api-protocols-testing/)
 
-Testing APIs beyond REST. One FX quotes service of our own (EUR/USD, USD/JPY…) serves the same live feed over
-**gRPC**, **WebSocket** and **Server-Sent Events**, so the tests compare the protocols on the same data.
+Testing APIs beyond REST. One FX quotes service of our own serves the same live feed over **gRPC**,
+**WebSocket** and **Server-Sent Events**, so the tests can compare the three protocols on the same data.
 
-- **System under test:** `services/quotes`: a seeded random-walk quote feed (same seed, same prices) and a gRPC
-  server for `proto/quotes/v1/quotes.proto`: unary, server streaming, client streaming and bidirectional streaming,
-  plus the standard health and reflection services; and an HTTP server with WebSocket `/ws` and SSE `/sse`.
-- **In-process per worker:** every Playwright worker starts its own feed and server on a free port; no Docker needed.
-- **The .proto is the contract:** `buf lint` and `buf breaking` against an approved snapshot, in CI and on every PR.
+|                        |                                                                                                                                                                                                                                    |
+| ---------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **System under test**  | own quotes service (`services/quotes`): a seeded random-walk feed; gRPC with all four call kinds, health and reflection; WebSocket `/ws` and SSE `/sse`                                                                            |
+| **Language and tools** | TypeScript · Playwright Test · `@grpc/grpc-js` · Protocol Buffers · buf · `ws` · zod · Allure                                                                                                                                      |
+| **Types of testing**   | functional API (gRPC, WebSocket, SSE), contract (`.proto` breaking changes), streaming, resilience (resume, heartbeats)                                                                                                            |
+| **Tests**              | 79: 47 gRPC, 32 WebSocket and SSE                                                                                                                                                                                                  |
+| **Test quality**       | 26/26 planted bugs caught: 12 in gRPC, 14 in WebSocket and SSE                                                                                                                                                                     |
+| **Reports**            | [Allure](https://nailkarimov.github.io/api-protocols-testing/) · [gRPC guide](https://nailkarimov.github.io/api-protocols-testing/grpc.html) · [realtime guide](https://nailkarimov.github.io/api-protocols-testing/realtime.html) |
 
-## gRPC (47 tests)
+## What is tested
 
-| Spec                      | What it proves                                                                                                                                                                                                                                                                                                                          |
-| ------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `grpc/unary`              | quote contract (5 decimals, 3 for JPY; bid < ask; 1–3 pip spread; fresh time); status codes INVALID_ARGUMENT, NOT_FOUND, UNAUTHENTICATED, RESOURCE_EXHAUSTED (64 KiB), UNIMPLEMENTED; deadlines, and the server stops the abandoned work; request id in headers and trailers                                                            |
-| `grpc/streaming`          | server stream: snapshot first, then updates **without seq gaps**, OK at `max_updates`; cancel frees the server's listener; deadline on an endless stream. Client stream: counts, exact decimal sum, named rejections, 1 000 / 1 001 orders. Bidi: fills in order, buy at the ask and sell at the bid of the quote it was priced against |
-| `grpc/health-reflection`  | `grpc.health.v1` SERVING / NOT_SERVING / NOT_FOUND, public without a token; reflection lists every service and describes the API without the `.proto`                                                                                                                                                                                   |
-| `contract/proto-breaking` | the `.proto` matches the approved snapshot; 8 typical edits are caught (type change, removed field or RPC, renamed field, unary → streaming, removed enum value, renamed package), adding a field passes                                                                                                                                |
+| Suite                     | Tool      | What it proves                                                                                                                                                                                                                             |
+| ------------------------- | --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `grpc/unary`              | grpc-js   | the quote contract (5 decimals, 3 for JPY; bid < ask; fresh time); status codes INVALID_ARGUMENT, NOT_FOUND, UNAUTHENTICATED, RESOURCE_EXHAUSTED, UNIMPLEMENTED; deadlines stop the abandoned work; the request id in headers and trailers |
+| `grpc/streaming`          | grpc-js   | server stream: a snapshot, then updates with no seq gaps, cancel frees the listener. Client stream: exact sums, 1 000 / 1 001 orders. Bidi: fills at the right side of the quote                                                           |
+| `grpc/health-reflection`  | grpc-js   | `grpc.health.v1` states, public without a token; reflection describes the API without the `.proto`                                                                                                                                         |
+| `contract/proto-breaking` | buf       | the `.proto` matches the approved snapshot; 8 typical breaking edits are caught, adding a field passes                                                                                                                                     |
+| `realtime/websocket`      | ws        | 401 before the upgrade, subprotocol, no seq gaps, bad messages and close codes 1002 / 1008 / 1009 / 1001, **drop and resume with `since`**, dead clients dropped by heartbeat, 20 clients see identical prices                             |
+| `realtime/sse`            | fetch     | headers, `retry`, a cursor id, **resume with `Last-Event-ID`**, heartbeat comments, JSON errors, closed tabs free their listeners                                                                                                          |
+| `realtime/cross-protocol` | all three | gRPC, WebSocket and SSE report the same bid / ask for every common seq                                                                                                                                                                     |
 
-**Do the tests catch bugs?** 12 bugs were planted by hand (no token check, work going on after the deadline, a
-leaked stream listener, no snapshot, every 10th update dropped, the buyer paying the bid, duplicate orders allowed,
-an off-by-one order limit, NOT_FOUND reported as INVALID_ARGUMENT, request id missing from trailers, JPY priced
-with 5 decimals, no request size limit): all 12 caught. `buf lint` itself found a design issue on day one: several
-RPCs shared request and response messages, so none of them could evolve alone. Details: [`docs/grpc.md`](docs/grpc.md) ·
-visual guide: [`docs/grpc.html`](https://nailkarimov.github.io/api-protocols-testing/grpc.html).
+## Findings
 
-## WebSocket and SSE (32 tests)
-
-| Spec                      | What it proves                                                                                                                                                                                                                                                                                                                                                                                                             |
-| ------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `realtime/websocket`      | handshake: 401 before the upgrade, subprotocol `quotes.v1` (none → 1002); ack, snapshot, no seq gaps; 6 bad messages answered while the socket stays, the 5th → 1008; 5 KiB frame → 1009; unsubscribe; **drop and resume with `since`: nothing missed, nothing twice**; stale `since` → reset; a client that never pongs is dropped; shutdown → 1001; 20 clients see identical prices; closed clients free their listeners |
-| `realtime/sse`            | SSE headers, `retry`, an id that is a cursor of all pairs; **resume with `Last-Event-ID`**; stale cursor → reset; heartbeat comments; 401 / 406 / 400 / 404 as JSON; closed tabs free their listeners; shutdown ends the stream                                                                                                                                                                                            |
-| `realtime/cross-protocol` | gRPC, WebSocket and SSE report the same bid/ask for every common seq                                                                                                                                                                                                                                                                                                                                                       |
-
-14 bugs planted in the WebSocket and SSE server (resume ignored, a cursor naming one pair, silent clients never
-dropped, leaked listeners, no 1001 on shutdown, …): all 14 caught. Details: [`docs/realtime.md`](docs/realtime.md) ·
-visual guide with a connection you cut and resume:
-[`docs/realtime.html`](https://nailkarimov.github.io/api-protocols-testing/realtime.html).
+- **buf lint found a design issue on day one.** Several RPCs shared request and response messages, so none of
+  them could evolve on its own. Each RPC now has its own messages.
+- **Resume is the hard part of realtime.** The planted bugs that ignored `since` or used a cursor naming one pair
+  passed every connect test. Only the drop-and-resume tests caught them.
+- **Leaks are invisible to the client.** Leaked stream listeners never showed in an answer. The tests read the
+  server's listener count after cancel and close.
 
 ## Running it
 
+Requirements: Node.js 22+, the buf CLI for contract checks, Java 17+ for a local Allure report. No Docker needed.
+
 ```bash
 npm ci
-npm test                 # everything
+npm test                 # everything; every worker starts its own service on a free port
 npm run test:grpc        # gRPC only
-npm run test:realtime   # WebSocket and SSE
+npm run test:realtime    # WebSocket and SSE
 npm run test:contract    # buf breaking against contracts/quotes.v1.binpb
 npm run proto:lint       # buf lint + format check
-npm run quotes:dev       # by hand: gRPC on :50051, WebSocket and SSE on :8080, then for example:
-grpcurl -plaintext -H 'authorization: Bearer dev-token' -d '{"pair":"EURUSD"}' localhost:50051 quotes.v1.QuoteService/GetQuote
-curl -N -H 'Authorization: Bearer dev-token' 'http://localhost:8080/sse?pairs=EURUSD,USDJPY'
+npm run quotes:dev       # gRPC :50051, WebSocket and SSE :8080, token dev-token
 ```
 
-A deliberate contract change: edit the `.proto`, run `npm run proto:approve`, commit both files.
+A deliberate contract change: edit the `.proto`, run `npm run proto:approve`, and commit both files.
+
+## Project structure
+
+```text
+proto/quotes/v1/       the .proto contract
+contracts/             the approved snapshot (quotes.v1.binpb) for buf breaking
+services/quotes/       the system under test: feed, gRPC server, HTTP server with /ws and /sse
+src/grpc/, src/realtime/   clients and helpers for the tests
+src/fixtures.ts        a service per worker
+tests/grpc/            gRPC specs
+tests/realtime/        WebSocket, SSE and cross-protocol specs
+tests/contract/        proto breaking-change spec
+docs/                  test plan, test report, guides
+```
+
+## CI
+
+`.github/workflows/tests.yml` runs on push, pull request, nightly at 03:00 UTC and on demand:
+
+- lint, format and typecheck, then `buf lint` and `buf breaking`;
+- all tests, then the Allure report with history on GitHub Pages.
+
+## Documentation
+
+| Document                                                                                                             | What it is                                                                              |
+| -------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------- |
+| [`docs/test-plan.md`](docs/test-plan.md)                                                                             | test plan (ISO/IEC/IEEE 29119-3)                                                        |
+| [`docs/test-report.md`](docs/test-report.md)                                                                         | test summary report: latest results, findings, recommendations                          |
+| [`docs/grpc.md`](docs/grpc.md) · [visual](https://nailkarimov.github.io/api-protocols-testing/grpc.html)             | gRPC: four call kinds, status codes, deadlines, breaking `.proto` changes, planted bugs |
+| [`docs/realtime.md`](docs/realtime.md) · [visual](https://nailkarimov.github.io/api-protocols-testing/realtime.html) | WebSocket and SSE: resume without gaps, heartbeats, close codes, planted bugs           |
 
 ## Part of a portfolio
 
-REST and GraphQL tests of public APIs: [api-test-automation](https://github.com/NailKarimov/api-test-automation) ·
-contract testing: [contract-testing-lab](https://github.com/NailKarimov/contract-testing-lab) ·
-microservices: [microservices-testing](https://github.com/NailKarimov/microservices-testing) ·
-database and OAuth 2.0: [ledger-api-testing](https://github.com/NailKarimov/ledger-api-testing) ·
-overview: [github.com/NailKarimov](https://github.com/NailKarimov).
-
-**Stack:** TypeScript · gRPC (`@grpc/grpc-js`, proto-loader, health, reflection) · Protocol Buffers · buf · WebSocket
-(`ws`) · Server-Sent Events · Playwright
-Test · zod · Allure · GitHub Actions.
+One of 13 test automation projects by [Nail Karimov](https://github.com/NailKarimov):
+[all projects](https://github.com/NailKarimov) ·
+[testing map](https://nailkarimov.github.io/api-test-automation/testing-map.html) ·
+[toolbox](https://nailkarimov.github.io/api-test-automation/toolbox.html).
