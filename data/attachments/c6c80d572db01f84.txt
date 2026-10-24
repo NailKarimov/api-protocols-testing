@@ -1,3 +1,0 @@
-ws://127.0.0.1:34195/ws  (Authorization: Bearer ***)
-17:23:53.064 open (subprotocol quotes.v1)
-17:23:53.066 close 1000 bye
