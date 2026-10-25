@@ -1,0 +1,8 @@
+ws://127.0.0.1:42543/ws  (Authorization: Bearer ***)
+07:55:07.905 open (subprotocol quotes.v1)
+07:55:07.905 → {"type":"buy"}
+07:55:07.905 → {"type":"ping","id":1}
+07:55:07.905 ← {"type":"error","code":"unknown_type","message":"unknown message type \"buy\""}
+07:55:07.905 ← {"type":"pong","id":1}
+07:55:08.086 ← ping
+07:55:08.088 close 1000 bye

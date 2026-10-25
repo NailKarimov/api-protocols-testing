@@ -1,0 +1,27 @@
+http://127.0.0.1:37203/sse  (Authorization: Bearer ***)
+07:55:07.000 GET /sse?pairs=EURUSD
+07:55:07.006 200 text/event-stream; charset=utf-8
+07:55:07.006 event quote id=EURUSD=46 {"type":"quote","pair":"EURUSD","bid":"1.08487","ask":"1.08505","seq":46,"time":"2026-10-25T07:55:06.988Z"}
+07:55:07.009 event quote id=EURUSD=47 {"type":"quote","pair":"EURUSD","bid":"1.08485","ask":"1.08510","seq":47,"time":"2026-10-25T07:55:07.009Z"}
+07:55:07.029 event quote id=EURUSD=48 {"type":"quote","pair":"EURUSD","bid":"1.08491","ask":"1.08501","seq":48,"time":"2026-10-25T07:55:07.029Z"}
+07:55:07.049 event quote id=EURUSD=49 {"type":"quote","pair":"EURUSD","bid":"1.08484","ask":"1.08509","seq":49,"time":"2026-10-25T07:55:07.048Z"}
+07:55:07.070 event quote id=EURUSD=50 {"type":"quote","pair":"EURUSD","bid":"1.08490","ask":"1.08506","seq":50,"time":"2026-10-25T07:55:07.070Z"}
+07:55:07.090 event quote id=EURUSD=51 {"type":"quote","pair":"EURUSD","bid":"1.08487","ask":"1.08510","seq":51,"time":"2026-10-25T07:55:07.090Z"}
+07:55:07.111 event quote id=EURUSD=52 {"type":"quote","pair":"EURUSD","bid":"1.08483","ask":"1.08507","seq":52,"time":"2026-10-25T07:55:07.111Z"}
+07:55:07.132 event quote id=EURUSD=53 {"type":"quote","pair":"EURUSD","bid":"1.08485","ask":"1.08514","seq":53,"time":"2026-10-25T07:55:07.132Z"}
+07:55:07.153 event quote id=EURUSD=54 {"type":"quote","pair":"EURUSD","bid":"1.08493","ask":"1.08510","seq":54,"time":"2026-10-25T07:55:07.152Z"}
+07:55:07.173 event quote id=EURUSD=55 {"type":"quote","pair":"EURUSD","bid":"1.08499","ask":"1.08512","seq":55,"time":"2026-10-25T07:55:07.173Z"}
+07:55:07.194 event quote id=EURUSD=56 {"type":"quote","pair":"EURUSD","bid":"1.08500","ask":"1.08514","seq":56,"time":"2026-10-25T07:55:07.193Z"}
+07:55:07.206 comment : ping
+07:55:07.213 event quote id=EURUSD=57 {"type":"quote","pair":"EURUSD","bid":"1.08490","ask":"1.08518","seq":57,"time":"2026-10-25T07:55:07.213Z"}
+07:55:07.234 event quote id=EURUSD=58 {"type":"quote","pair":"EURUSD","bid":"1.08493","ask":"1.08515","seq":58,"time":"2026-10-25T07:55:07.233Z"}
+07:55:07.254 event quote id=EURUSD=59 {"type":"quote","pair":"EURUSD","bid":"1.08501","ask":"1.08511","seq":59,"time":"2026-10-25T07:55:07.254Z"}
+07:55:07.274 event quote id=EURUSD=60 {"type":"quote","pair":"EURUSD","bid":"1.08494","ask":"1.08523","seq":60,"time":"2026-10-25T07:55:07.273Z"}
+07:55:07.295 event quote id=EURUSD=61 {"type":"quote","pair":"EURUSD","bid":"1.08507","ask":"1.08518","seq":61,"time":"2026-10-25T07:55:07.294Z"}
+07:55:07.314 event quote id=EURUSD=62 {"type":"quote","pair":"EURUSD","bid":"1.08497","ask":"1.08525","seq":62,"time":"2026-10-25T07:55:07.314Z"}
+07:55:07.334 event quote id=EURUSD=63 {"type":"quote","pair":"EURUSD","bid":"1.08504","ask":"1.08522","seq":63,"time":"2026-10-25T07:55:07.334Z"}
+07:55:07.355 event quote id=EURUSD=64 {"type":"quote","pair":"EURUSD","bid":"1.08502","ask":"1.08522","seq":64,"time":"2026-10-25T07:55:07.354Z"}
+07:55:07.374 event quote id=EURUSD=65 {"type":"quote","pair":"EURUSD","bid":"1.08506","ask":"1.08525","seq":65,"time":"2026-10-25T07:55:07.374Z"}
+07:55:07.394 event quote id=EURUSD=66 {"type":"quote","pair":"EURUSD","bid":"1.08502","ask":"1.08525","seq":66,"time":"2026-10-25T07:55:07.393Z"}
+07:55:07.407 comment : ping
+07:55:07.409 (client closes the stream)

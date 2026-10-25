@@ -1,0 +1,12 @@
+http://127.0.0.1:42543/sse  (Authorization: Bearer ***)
+07:55:06.506 GET /sse?pairs=EURUSD,GBPUSD
+07:55:06.507 200 text/event-stream; charset=utf-8
+07:55:06.507 event quote id=EURUSD=22,GBPUSD=0 {"type":"quote","pair":"EURUSD","bid":"1.08482","ask":"1.08503","seq":22,"time":"2026-10-25T07:55:06.506Z"}
+07:55:06.507 event quote id=EURUSD=22,GBPUSD=22 {"type":"quote","pair":"GBPUSD","bid":"1.26992","ask":"1.27016","seq":22,"time":"2026-10-25T07:55:06.506Z"}
+07:55:06.527 event quote id=EURUSD=23,GBPUSD=22 {"type":"quote","pair":"EURUSD","bid":"1.08485","ask":"1.08505","seq":23,"time":"2026-10-25T07:55:06.527Z"}
+07:55:06.527 event quote id=EURUSD=23,GBPUSD=23 {"type":"quote","pair":"GBPUSD","bid":"1.26988","ask":"1.27013","seq":23,"time":"2026-10-25T07:55:06.527Z"}
+07:55:06.547 event quote id=EURUSD=24,GBPUSD=23 {"type":"quote","pair":"EURUSD","bid":"1.08483","ask":"1.08499","seq":24,"time":"2026-10-25T07:55:06.547Z"}
+07:55:06.547 event quote id=EURUSD=24,GBPUSD=24 {"type":"quote","pair":"GBPUSD","bid":"1.26991","ask":"1.27009","seq":24,"time":"2026-10-25T07:55:06.547Z"}
+07:55:06.547 (client closes the stream)
+07:55:06.548 stream ended
+07:55:06.854 (client closes the stream)
