@@ -3,6 +3,16 @@
 [![Tests](https://github.com/NailKarimov/api-protocols-testing/actions/workflows/tests.yml/badge.svg)](https://github.com/NailKarimov/api-protocols-testing/actions/workflows/tests.yml)
 [![Allure report](https://img.shields.io/badge/report-Allure-orange)](https://nailkarimov.github.io/api-protocols-testing/)
 
+### ▶ Open online
+
+| Page                                                                                   | What it is        |
+| -------------------------------------------------------------------------------------- | ----------------- |
+| **[Allure test report](https://nailkarimov.github.io/api-protocols-testing/)**         | latest CI run     |
+| [gRPC](https://nailkarimov.github.io/api-protocols-testing/grpc.html)                  | interactive guide |
+| [WebSocket and SSE](https://nailkarimov.github.io/api-protocols-testing/realtime.html) | interactive guide |
+
+Click these links: opening an `.html` file in the file list shows its source code, GitHub does not run it.
+
 Testing APIs beyond REST. One FX quotes service of our own serves the same live feed over **gRPC**,
 **WebSocket** and **Server-Sent Events**, so the tests can compare the three protocols on the same data.
 
