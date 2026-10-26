@@ -1,0 +1,47 @@
+Subscribe  (399 ms)
+Call options: {"token":"***"}
+Request: {"pairs":["EURUSD","USDJPY"],"max_updates":40}
+Status: OK OK
+Headers: {"content-type":"application/grpc+proto","date":"Mon, 26 Oct 2026 10:39:02 GMT"}
+Trailers: {}
+Messages (40):
+  {"pair":"EURUSD","bid":"1.08486","ask":"1.08511","seq":13,"time":{"seconds":1793011142,"nanos":686000000}}
+  {"pair":"USDJPY","bid":"151.181","ask":"151.202","seq":13,"time":{"seconds":1793011142,"nanos":686000000}}
+  {"pair":"EURUSD","bid":"1.08488","ask":"1.08509","seq":14,"time":{"seconds":1793011142,"nanos":705000000}}
+  {"pair":"USDJPY","bid":"151.183","ask":"151.193","seq":14,"time":{"seconds":1793011142,"nanos":705000000}}
+  {"pair":"EURUSD","bid":"1.08480","ask":"1.08508","seq":15,"time":{"seconds":1793011142,"nanos":725000000}}
+  {"pair":"USDJPY","bid":"151.179","ask":"151.196","seq":15,"time":{"seconds":1793011142,"nanos":725000000}}
+  {"pair":"EURUSD","bid":"1.08485","ask":"1.08509","seq":16,"time":{"seconds":1793011142,"nanos":746000000}}
+  {"pair":"USDJPY","bid":"151.174","ask":"151.200","seq":16,"time":{"seconds":1793011142,"nanos":746000000}}
+  {"pair":"EURUSD","bid":"1.08486","ask":"1.08501","seq":17,"time":{"seconds":1793011142,"nanos":766000000}}
+  {"pair":"USDJPY","bid":"151.177","ask":"151.194","seq":17,"time":{"seconds":1793011142,"nanos":767000000}}
+  {"pair":"EURUSD","bid":"1.08480","ask":"1.08507","seq":18,"time":{"seconds":1793011142,"nanos":787000000}}
+  {"pair":"USDJPY","bid":"151.169","ask":"151.197","seq":18,"time":{"seconds":1793011142,"nanos":787000000}}
+  {"pair":"EURUSD","bid":"1.08479","ask":"1.08509","seq":19,"time":{"seconds":1793011142,"nanos":807000000}}
+  {"pair":"USDJPY","bid":"151.179","ask":"151.192","seq":19,"time":{"seconds":1793011142,"nanos":807000000}}
+  {"pair":"EURUSD","bid":"1.08487","ask":"1.08505","seq":20,"time":{"seconds":1793011142,"nanos":827000000}}
+  {"pair":"USDJPY","bid":"151.172","ask":"151.202","seq":20,"time":{"seconds":1793011142,"nanos":827000000}}
+  {"pair":"EURUSD","bid":"1.08487","ask":"1.08502","seq":21,"time":{"seconds":1793011142,"nanos":848000000}}
+  {"pair":"USDJPY","bid":"151.169","ask":"151.199","seq":21,"time":{"seconds":1793011142,"nanos":848000000}}
+  {"pair":"EURUSD","bid":"1.08482","ask":"1.08503","seq":22,"time":{"seconds":1793011142,"nanos":869000000}}
+  {"pair":"USDJPY","bid":"151.178","ask":"151.193","seq":22,"time":{"seconds":1793011142,"nanos":869000000}}
+  {"pair":"EURUSD","bid":"1.08485","ask":"1.08505","seq":23,"time":{"seconds":1793011142,"nanos":889000000}}
+  {"pair":"USDJPY","bid":"151.184","ask":"151.197","seq":23,"time":{"seconds":1793011142,"nanos":889000000}}
+  {"pair":"EURUSD","bid":"1.08483","ask":"1.08499","seq":24,"time":{"seconds":1793011142,"nanos":909000000}}
+  {"pair":"USDJPY","bid":"151.178","ask":"151.198","seq":24,"time":{"seconds":1793011142,"nanos":909000000}}
+  {"pair":"EURUSD","bid":"1.08483","ask":"1.08507","seq":25,"time":{"seconds":1793011142,"nanos":930000000}}
+  {"pair":"USDJPY","bid":"151.173","ask":"151.198","seq":25,"time":{"seconds":1793011142,"nanos":930000000}}
+  {"pair":"EURUSD","bid":"1.08486","ask":"1.08497","seq":26,"time":{"seconds":1793011142,"nanos":949000000}}
+  {"pair":"USDJPY","bid":"151.172","ask":"151.191","seq":26,"time":{"seconds":1793011142,"nanos":949000000}}
+  {"pair":"EURUSD","bid":"1.08491","ask":"1.08502","seq":27,"time":{"seconds":1793011142,"nanos":970000000}}
+  {"pair":"USDJPY","bid":"151.167","ask":"151.187","seq":27,"time":{"seconds":1793011142,"nanos":970000000}}
+  {"pair":"EURUSD","bid":"1.08485","ask":"1.08506","seq":28,"time":{"seconds":1793011142,"nanos":989000000}}
+  {"pair":"USDJPY","bid":"151.162","ask":"151.187","seq":28,"time":{"seconds":1793011142,"nanos":990000000}}
+  {"pair":"EURUSD","bid":"1.08492","ask":"1.08507","seq":29,"time":{"seconds":1793011143,"nanos":9000000}}
+  {"pair":"USDJPY","bid":"151.169","ask":"151.184","seq":29,"time":{"seconds":1793011143,"nanos":9000000}}
+  {"pair":"EURUSD","bid":"1.08494","ask":"1.08505","seq":30,"time":{"seconds":1793011143,"nanos":30000000}}
+  {"pair":"USDJPY","bid":"151.166","ask":"151.180","seq":30,"time":{"seconds":1793011143,"nanos":30000000}}
+  {"pair":"EURUSD","bid":"1.08498","ask":"1.08508","seq":31,"time":{"seconds":1793011143,"nanos":50000000}}
+  {"pair":"USDJPY","bid":"151.160","ask":"151.180","seq":31,"time":{"seconds":1793011143,"nanos":51000000}}
+  {"pair":"EURUSD","bid":"1.08488","ask":"1.08510","seq":32,"time":{"seconds":1793011143,"nanos":72000000}}
+  {"pair":"USDJPY","bid":"151.167","ask":"151.182","seq":32,"time":{"seconds":1793011143,"nanos":72000000}}

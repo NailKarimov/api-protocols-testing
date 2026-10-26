@@ -1,8 +1,0 @@
-SubmitOrders  (45 ms)
-Call options: {"token":"***"}
-Request: {"orders":1000,"first":[{"client_order_id":"b0","pair":"EURUSD","side":"SIDE_BUY","amount":"1"},{"client_order_id":"b1","pair":"EURUSD","side":"SIDE_BUY","amount":"1"},{"client_order_id":"b2","pair":"EURUSD","side":"SIDE_BUY","amount":"1"}]}
-Status: OK OK
-Headers: {"content-type":"application/grpc+proto","date":"Mon, 26 Oct 2026 08:16:05 GMT"}
-Trailers: {}
-Messages (1):
-  {"rejections":[],"accepted":1000,"rejected":0,"total_amount":"1000.00"}

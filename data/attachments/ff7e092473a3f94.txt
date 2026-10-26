@@ -1,8 +1,0 @@
-SubmitOrders  (2 ms)
-Call options: {"token":"***"}
-Request: {"orders":0,"first":[]}
-Status: OK OK
-Headers: {"content-type":"application/grpc+proto","date":"Mon, 26 Oct 2026 08:16:05 GMT"}
-Trailers: {}
-Messages (1):
-  {"rejections":[],"accepted":0,"rejected":0,"total_amount":"0.00"}

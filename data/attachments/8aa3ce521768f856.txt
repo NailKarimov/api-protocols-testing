@@ -1,0 +1,7 @@
+SubmitOrders  (116 ms)
+Call options: {"token":"***"}
+Request: {"orders":1001,"first":[{"client_order_id":"b0","pair":"EURUSD","side":"SIDE_BUY","amount":"1"},{"client_order_id":"b1","pair":"EURUSD","side":"SIDE_BUY","amount":"1"},{"client_order_id":"b2","pair":"EURUSD","side":"SIDE_BUY","amount":"1"}]}
+Status: RESOURCE_EXHAUSTED at most 1000 orders per stream
+Headers: {"content-type":"application/grpc+proto","date":"Mon, 26 Oct 2026 10:39:03 GMT"}
+Trailers: {}
+Messages (0):

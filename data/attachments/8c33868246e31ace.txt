@@ -1,0 +1,9 @@
+Subscribe  (14 ms)
+Call options: {"deadlineMs":1000,"token":"***"}
+Request: {"pairs":["EURUSD","GBPUSD"],"max_updates":2}
+Status: OK OK
+Headers: {"content-type":"application/grpc+proto","date":"Mon, 26 Oct 2026 10:39:02 GMT"}
+Trailers: {}
+Messages (2):
+  {"pair":"EURUSD","bid":"1.08490","ask":"1.08501","seq":1,"time":{"seconds":1793011142,"nanos":765000000}}
+  {"pair":"GBPUSD","bid":"1.26993","ask":"1.27017","seq":1,"time":{"seconds":1793011142,"nanos":765000000}}

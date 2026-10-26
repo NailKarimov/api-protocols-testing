@@ -1,0 +1,7 @@
+http://127.0.0.1:44245/sse  (Authorization: Bearer ***)
+10:39:06.502 GET /sse?pairs=EURUSD
+10:39:06.507 200 text/event-stream; charset=utf-8
+10:39:06.507 event quote id=EURUSD=63 {"type":"quote","pair":"EURUSD","bid":"1.08504","ask":"1.08522","seq":63,"time":"2026-10-26T10:39:06.504Z"}
+10:39:06.510 (client closes the stream)
+10:39:06.513 stream ended
+10:39:06.618 (client closes the stream)

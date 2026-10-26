@@ -1,0 +1,34 @@
+http://127.0.0.1:44245/sse  (Authorization: Bearer ***)
+10:39:05.961 GET /sse?pairs=EURUSD,GBPUSD  Last-Event-ID: EURUSD=25,GBPUSD=25
+10:39:05.967 200 text/event-stream; charset=utf-8
+10:39:05.967 event quote id=EURUSD=26,GBPUSD=0 {"type":"quote","pair":"EURUSD","bid":"1.08486","ask":"1.08497","seq":26,"time":"2026-10-26T10:39:05.680Z"}
+10:39:05.967 event quote id=EURUSD=27,GBPUSD=0 {"type":"quote","pair":"EURUSD","bid":"1.08491","ask":"1.08502","seq":27,"time":"2026-10-26T10:39:05.700Z"}
+10:39:05.967 event quote id=EURUSD=28,GBPUSD=0 {"type":"quote","pair":"EURUSD","bid":"1.08485","ask":"1.08506","seq":28,"time":"2026-10-26T10:39:05.720Z"}
+10:39:05.967 event quote id=EURUSD=29,GBPUSD=0 {"type":"quote","pair":"EURUSD","bid":"1.08492","ask":"1.08507","seq":29,"time":"2026-10-26T10:39:05.741Z"}
+10:39:05.967 event quote id=EURUSD=30,GBPUSD=0 {"type":"quote","pair":"EURUSD","bid":"1.08494","ask":"1.08505","seq":30,"time":"2026-10-26T10:39:05.761Z"}
+10:39:05.967 event quote id=EURUSD=31,GBPUSD=0 {"type":"quote","pair":"EURUSD","bid":"1.08498","ask":"1.08508","seq":31,"time":"2026-10-26T10:39:05.781Z"}
+10:39:05.967 event quote id=EURUSD=32,GBPUSD=0 {"type":"quote","pair":"EURUSD","bid":"1.08488","ask":"1.08510","seq":32,"time":"2026-10-26T10:39:05.801Z"}
+10:39:05.967 event quote id=EURUSD=33,GBPUSD=0 {"type":"quote","pair":"EURUSD","bid":"1.08489","ask":"1.08504","seq":33,"time":"2026-10-26T10:39:05.821Z"}
+10:39:05.967 event quote id=EURUSD=34,GBPUSD=0 {"type":"quote","pair":"EURUSD","bid":"1.08486","ask":"1.08510","seq":34,"time":"2026-10-26T10:39:05.841Z"}
+10:39:05.967 event quote id=EURUSD=35,GBPUSD=0 {"type":"quote","pair":"EURUSD","bid":"1.08485","ask":"1.08509","seq":35,"time":"2026-10-26T10:39:05.861Z"}
+10:39:05.967 event quote id=EURUSD=36,GBPUSD=0 {"type":"quote","pair":"EURUSD","bid":"1.08486","ask":"1.08509","seq":36,"time":"2026-10-26T10:39:05.881Z"}
+10:39:05.967 event quote id=EURUSD=37,GBPUSD=0 {"type":"quote","pair":"EURUSD","bid":"1.08497","ask":"1.08508","seq":37,"time":"2026-10-26T10:39:05.902Z"}
+10:39:05.967 event quote id=EURUSD=38,GBPUSD=0 {"type":"quote","pair":"EURUSD","bid":"1.08500","ask":"1.08513","seq":38,"time":"2026-10-26T10:39:05.922Z"}
+10:39:05.967 event quote id=EURUSD=39,GBPUSD=0 {"type":"quote","pair":"EURUSD","bid":"1.08500","ask":"1.08516","seq":39,"time":"2026-10-26T10:39:05.943Z"}
+10:39:05.967 event quote id=EURUSD=39,GBPUSD=26 {"type":"quote","pair":"GBPUSD","bid":"1.27000","ask":"1.27015","seq":26,"time":"2026-10-26T10:39:05.680Z"}
+10:39:05.967 event quote id=EURUSD=39,GBPUSD=27 {"type":"quote","pair":"GBPUSD","bid":"1.26994","ask":"1.27012","seq":27,"time":"2026-10-26T10:39:05.700Z"}
+10:39:05.967 event quote id=EURUSD=39,GBPUSD=28 {"type":"quote","pair":"GBPUSD","bid":"1.26987","ask":"1.27013","seq":28,"time":"2026-10-26T10:39:05.721Z"}
+10:39:05.967 event quote id=EURUSD=39,GBPUSD=29 {"type":"quote","pair":"GBPUSD","bid":"1.26992","ask":"1.27015","seq":29,"time":"2026-10-26T10:39:05.741Z"}
+10:39:05.967 event quote id=EURUSD=39,GBPUSD=30 {"type":"quote","pair":"GBPUSD","bid":"1.26994","ask":"1.27012","seq":30,"time":"2026-10-26T10:39:05.761Z"}
+10:39:05.967 event quote id=EURUSD=39,GBPUSD=31 {"type":"quote","pair":"GBPUSD","bid":"1.26984","ask":"1.27013","seq":31,"time":"2026-10-26T10:39:05.781Z"}
+10:39:05.967 event quote id=EURUSD=39,GBPUSD=32 {"type":"quote","pair":"GBPUSD","bid":"1.26987","ask":"1.27014","seq":32,"time":"2026-10-26T10:39:05.801Z"}
+10:39:05.967 event quote id=EURUSD=39,GBPUSD=33 {"type":"quote","pair":"GBPUSD","bid":"1.26985","ask":"1.27011","seq":33,"time":"2026-10-26T10:39:05.821Z"}
+10:39:05.967 event quote id=EURUSD=39,GBPUSD=34 {"type":"quote","pair":"GBPUSD","bid":"1.26987","ask":"1.27005","seq":34,"time":"2026-10-26T10:39:05.841Z"}
+10:39:05.967 event quote id=EURUSD=39,GBPUSD=35 {"type":"quote","pair":"GBPUSD","bid":"1.26981","ask":"1.27006","seq":35,"time":"2026-10-26T10:39:05.861Z"}
+10:39:05.967 event quote id=EURUSD=39,GBPUSD=36 {"type":"quote","pair":"GBPUSD","bid":"1.26989","ask":"1.27000","seq":36,"time":"2026-10-26T10:39:05.881Z"}
+10:39:05.967 event quote id=EURUSD=39,GBPUSD=37 {"type":"quote","pair":"GBPUSD","bid":"1.26988","ask":"1.27007","seq":37,"time":"2026-10-26T10:39:05.902Z"}
+10:39:05.968 event quote id=EURUSD=39,GBPUSD=38 {"type":"quote","pair":"GBPUSD","bid":"1.26991","ask":"1.27004","seq":38,"time":"2026-10-26T10:39:05.922Z"}
+10:39:05.968 event quote id=EURUSD=39,GBPUSD=39 {"type":"quote","pair":"GBPUSD","bid":"1.26983","ask":"1.27012","seq":39,"time":"2026-10-26T10:39:05.943Z"}
+10:39:05.968 event quote id=EURUSD=40,GBPUSD=39 {"type":"quote","pair":"EURUSD","bid":"1.08494","ask":"1.08515","seq":40,"time":"2026-10-26T10:39:05.966Z"}
+10:39:05.968 event quote id=EURUSD=40,GBPUSD=40 {"type":"quote","pair":"GBPUSD","bid":"1.26985","ask":"1.27009","seq":40,"time":"2026-10-26T10:39:05.966Z"}
+10:39:05.972 (client closes the stream)

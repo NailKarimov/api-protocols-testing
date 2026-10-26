@@ -1,0 +1,2 @@
+ws://127.0.0.1:34989/ws  (Authorization: Bearer ***)
+10:39:06.805 handshake refused: HTTP 401
