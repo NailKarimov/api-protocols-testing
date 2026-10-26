@@ -3,6 +3,7 @@
 [![Tests](https://github.com/NailKarimov/api-protocols-testing/actions/workflows/tests.yml/badge.svg)](https://github.com/NailKarimov/api-protocols-testing/actions/workflows/tests.yml)
 [![Allure report](https://img.shields.io/badge/report-Allure-orange)](https://nailkarimov.github.io/api-protocols-testing/)
 [![Release](https://img.shields.io/github/v/release/NailKarimov/api-protocols-testing)](https://github.com/NailKarimov/api-protocols-testing/releases)
+[![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/NailKarimov/api-protocols-testing?quickstart=1)
 
 ### ▶ Open online
 
@@ -48,6 +49,8 @@ Testing APIs beyond REST. One FX quotes service of our own serves the same live 
   server's listener count after cancel and close.
 
 ## Running it
+
+No local setup: the **Open in GitHub Codespaces** badge starts a browser VS Code with this repository, its tools and Docker; the container runs `npm ci` on creation, then `npm test` works in the terminal.
 
 Requirements: Node.js 22+, the buf CLI for contract checks, Java 17+ for a local Allure report. No Docker needed.
 
