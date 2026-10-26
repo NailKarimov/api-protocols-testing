@@ -1,0 +1,4 @@
+ws://127.0.0.1:42989/ws  (Authorization: Bearer ***)
+15:14:20.098 open (subprotocol quotes.v1)
+15:14:20.133 ← ping
+15:14:20.332 close 1006 
