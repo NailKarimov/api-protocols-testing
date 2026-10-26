@@ -1,8 +1,0 @@
-ws://127.0.0.1:34557/ws  (Authorization: Bearer ***)
-14:54:01.147 open (subprotocol quotes.v1)
-14:54:01.147 → {"type":"buy"}
-14:54:01.147 → {"type":"ping","id":1}
-14:54:01.147 ← {"type":"error","code":"unknown_type","message":"unknown message type \"buy\""}
-14:54:01.147 ← {"type":"pong","id":1}
-14:54:01.328 ← ping
-14:54:01.330 close 1000 bye
