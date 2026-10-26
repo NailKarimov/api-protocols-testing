@@ -2,6 +2,7 @@
 
 [![Tests](https://github.com/NailKarimov/api-protocols-testing/actions/workflows/tests.yml/badge.svg)](https://github.com/NailKarimov/api-protocols-testing/actions/workflows/tests.yml)
 [![Allure report](https://img.shields.io/badge/report-Allure-orange)](https://nailkarimov.github.io/api-protocols-testing/)
+[![Release](https://img.shields.io/github/v/release/NailKarimov/api-protocols-testing)](https://github.com/NailKarimov/api-protocols-testing/releases)
 
 ### ▶ Open online
 
@@ -82,6 +83,8 @@ docs/                  test plan, test report, guides
 
 - lint, format and typecheck, then `buf lint` and `buf breaking`;
 - all tests, then the Allure report with history on GitHub Pages.
+
+Releases: committing `.github/releases/<tag>.md` runs the Release workflow, which creates the tag and the GitHub release with that file as its notes.
 
 ## Documentation
 

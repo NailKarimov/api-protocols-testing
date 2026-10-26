@@ -1,0 +1,45 @@
+name: Release
+
+# A release is published by committing its notes: .github/releases/<tag>.md
+# The workflow creates the tag on that commit and the GitHub release with the file as its notes.
+on:
+  push:
+    branches: [main]
+    paths: [".github/releases/*.md"]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Tag to release, e.g. v1.1.0 (needs .github/releases/<tag>.md)"
+        required: true
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 2
+      - name: Publish every notes file that has no release yet
+        env:
+          GH_TOKEN: ${{ github.token }}
+          INPUT_TAG: ${{ inputs.tag }}
+        run: |
+          set -euo pipefail
+          if [ -n "${INPUT_TAG:-}" ]; then tags="$INPUT_TAG"; else
+            tags=$(ls .github/releases/*.md | xargs -n1 basename | sed 's/\.md$//' | sort -V)
+          fi
+          latest=$(echo "$tags" | tail -1)
+          for tag in $tags; do
+            if gh release view "$tag" >/dev/null 2>&1; then echo "$tag already released"; continue; fi
+            flag=--latest=false; [ "$tag" = "$latest" ] && flag=--latest
+            gh release create "$tag" --target "$GITHUB_SHA" --title "${GITHUB_REPOSITORY#*/} $tag" \
+              --notes-file ".github/releases/$tag.md" "$flag"
+            echo "### Released $tag" >> "$GITHUB_STEP_SUMMARY"
+          done
