@@ -1,0 +1,35 @@
+http://127.0.0.1:44143/sse  (Authorization: Bearer ***)
+08:16:06.824 GET /sse?pairs=EURUSD,USDJPY
+08:16:06.835 200 text/event-stream; charset=utf-8
+08:16:06.836 event quote id=EURUSD=2,USDJPY=0 {"type":"quote","pair":"EURUSD","bid":"1.08487","ask":"1.08500","seq":2,"time":"2026-10-26T08:16:06.829Z"}
+08:16:06.836 event quote id=EURUSD=2,USDJPY=2 {"type":"quote","pair":"USDJPY","bid":"151.184","ask":"151.214","seq":2,"time":"2026-10-26T08:16:06.829Z"}
+08:16:06.849 event quote id=EURUSD=3,USDJPY=2 {"type":"quote","pair":"EURUSD","bid":"1.08476","ask":"1.08504","seq":3,"time":"2026-10-26T08:16:06.849Z"}
+08:16:06.850 event quote id=EURUSD=3,USDJPY=3 {"type":"quote","pair":"USDJPY","bid":"151.181","ask":"151.210","seq":3,"time":"2026-10-26T08:16:06.849Z"}
+08:16:06.870 event quote id=EURUSD=4,USDJPY=3 {"type":"quote","pair":"EURUSD","bid":"1.08480","ask":"1.08503","seq":4,"time":"2026-10-26T08:16:06.870Z"}
+08:16:06.870 event quote id=EURUSD=4,USDJPY=4 {"type":"quote","pair":"USDJPY","bid":"151.184","ask":"151.201","seq":4,"time":"2026-10-26T08:16:06.870Z"}
+08:16:06.890 event quote id=EURUSD=5,USDJPY=4 {"type":"quote","pair":"EURUSD","bid":"1.08485","ask":"1.08495","seq":5,"time":"2026-10-26T08:16:06.889Z"}
+08:16:06.890 event quote id=EURUSD=5,USDJPY=5 {"type":"quote","pair":"USDJPY","bid":"151.182","ask":"151.206","seq":5,"time":"2026-10-26T08:16:06.889Z"}
+08:16:06.911 event quote id=EURUSD=6,USDJPY=5 {"type":"quote","pair":"EURUSD","bid":"1.08480","ask":"1.08497","seq":6,"time":"2026-10-26T08:16:06.910Z"}
+08:16:06.911 event quote id=EURUSD=6,USDJPY=6 {"type":"quote","pair":"USDJPY","bid":"151.187","ask":"151.197","seq":6,"time":"2026-10-26T08:16:06.910Z"}
+08:16:06.930 event quote id=EURUSD=7,USDJPY=6 {"type":"quote","pair":"EURUSD","bid":"1.08476","ask":"1.08505","seq":7,"time":"2026-10-26T08:16:06.930Z"}
+08:16:06.930 event quote id=EURUSD=7,USDJPY=7 {"type":"quote","pair":"USDJPY","bid":"151.179","ask":"151.207","seq":7,"time":"2026-10-26T08:16:06.930Z"}
+08:16:06.950 event quote id=EURUSD=8,USDJPY=7 {"type":"quote","pair":"EURUSD","bid":"1.08482","ask":"1.08509","seq":8,"time":"2026-10-26T08:16:06.949Z"}
+08:16:06.950 event quote id=EURUSD=8,USDJPY=8 {"type":"quote","pair":"USDJPY","bid":"151.185","ask":"151.201","seq":8,"time":"2026-10-26T08:16:06.949Z"}
+08:16:06.970 event quote id=EURUSD=9,USDJPY=8 {"type":"quote","pair":"EURUSD","bid":"1.08487","ask":"1.08508","seq":9,"time":"2026-10-26T08:16:06.970Z"}
+08:16:06.970 event quote id=EURUSD=9,USDJPY=9 {"type":"quote","pair":"USDJPY","bid":"151.185","ask":"151.206","seq":9,"time":"2026-10-26T08:16:06.970Z"}
+08:16:06.991 event quote id=EURUSD=10,USDJPY=9 {"type":"quote","pair":"EURUSD","bid":"1.08488","ask":"1.08502","seq":10,"time":"2026-10-26T08:16:06.990Z"}
+08:16:06.991 event quote id=EURUSD=10,USDJPY=10 {"type":"quote","pair":"USDJPY","bid":"151.185","ask":"151.207","seq":10,"time":"2026-10-26T08:16:06.991Z"}
+08:16:07.011 event quote id=EURUSD=11,USDJPY=10 {"type":"quote","pair":"EURUSD","bid":"1.08482","ask":"1.08512","seq":11,"time":"2026-10-26T08:16:07.010Z"}
+08:16:07.011 event quote id=EURUSD=11,USDJPY=11 {"type":"quote","pair":"USDJPY","bid":"151.177","ask":"151.207","seq":11,"time":"2026-10-26T08:16:07.010Z"}
+08:16:07.031 event quote id=EURUSD=12,USDJPY=11 {"type":"quote","pair":"EURUSD","bid":"1.08487","ask":"1.08508","seq":12,"time":"2026-10-26T08:16:07.030Z"}
+08:16:07.031 event quote id=EURUSD=12,USDJPY=12 {"type":"quote","pair":"USDJPY","bid":"151.179","ask":"151.209","seq":12,"time":"2026-10-26T08:16:07.030Z"}
+08:16:07.032 comment : ping
+08:16:07.051 event quote id=EURUSD=13,USDJPY=12 {"type":"quote","pair":"EURUSD","bid":"1.08486","ask":"1.08511","seq":13,"time":"2026-10-26T08:16:07.051Z"}
+08:16:07.051 event quote id=EURUSD=13,USDJPY=13 {"type":"quote","pair":"USDJPY","bid":"151.181","ask":"151.202","seq":13,"time":"2026-10-26T08:16:07.051Z"}
+08:16:07.071 event quote id=EURUSD=14,USDJPY=13 {"type":"quote","pair":"EURUSD","bid":"1.08488","ask":"1.08509","seq":14,"time":"2026-10-26T08:16:07.071Z"}
+08:16:07.071 event quote id=EURUSD=14,USDJPY=14 {"type":"quote","pair":"USDJPY","bid":"151.183","ask":"151.193","seq":14,"time":"2026-10-26T08:16:07.071Z"}
+08:16:07.091 event quote id=EURUSD=15,USDJPY=14 {"type":"quote","pair":"EURUSD","bid":"1.08480","ask":"1.08508","seq":15,"time":"2026-10-26T08:16:07.091Z"}
+08:16:07.091 event quote id=EURUSD=15,USDJPY=15 {"type":"quote","pair":"USDJPY","bid":"151.179","ask":"151.196","seq":15,"time":"2026-10-26T08:16:07.091Z"}
+08:16:07.111 event quote id=EURUSD=16,USDJPY=15 {"type":"quote","pair":"EURUSD","bid":"1.08485","ask":"1.08509","seq":16,"time":"2026-10-26T08:16:07.111Z"}
+08:16:07.111 event quote id=EURUSD=16,USDJPY=16 {"type":"quote","pair":"USDJPY","bid":"151.174","ask":"151.200","seq":16,"time":"2026-10-26T08:16:07.111Z"}
+08:16:07.117 (client closes the stream)
