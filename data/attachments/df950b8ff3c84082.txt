@@ -1,0 +1,8 @@
+ws://127.0.0.1:38921/ws  (Authorization: Bearer ***)
+14:54:01.383 open (subprotocol quotes.v1)
+14:54:01.383 → (binary 3 bytes)
+14:54:01.383 → {"type":"ping","id":1}
+14:54:01.384 ← {"type":"error","code":"binary_not_supported","message":"send JSON text frames"}
+14:54:01.384 ← {"type":"pong","id":1}
+14:54:01.565 ← ping
+14:54:01.568 close 1000 bye

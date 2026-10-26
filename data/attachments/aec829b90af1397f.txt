@@ -1,0 +1,8 @@
+ws://127.0.0.1:34557/ws  (Authorization: Bearer ***)
+14:54:01.346 open (subprotocol quotes.v1)
+14:54:01.346 → {"type":"subscribe","pairs":["EURUSD","EURUSD","EURUSD","EURUSD","EURUSD","EURUSD","EURUSD","EURUSD","EURUSD","EURUSD","EURUSD"]}
+14:54:01.346 → {"type":"ping","id":1}
+14:54:01.346 ← {"type":"error","code":"bad_pairs","message":"pairs must list 1 … 10 pairs"}
+14:54:01.346 ← {"type":"pong","id":1}
+14:54:01.529 ← ping
+14:54:01.531 close 1000 bye

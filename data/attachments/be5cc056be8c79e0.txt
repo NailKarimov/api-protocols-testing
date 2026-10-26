@@ -1,0 +1,7 @@
+GetQuote  (3 ms)
+Call options: {"token":"***"}
+Request: {"pair":"ABCDEF","delay_ms":0}
+Status: NOT_FOUND unknown pair ABCDEF
+Headers: {"content-type":"application/grpc+proto","date":"Mon, 26 Oct 2026 14:53:57 GMT"}
+Trailers: {}
+Messages (0):
