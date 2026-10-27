@@ -1,0 +1,23 @@
+Subscribe  (303 ms)
+Call options: {"deadlineMs":300,"token":"***"}
+Request: {"pairs":["USDCHF"],"max_updates":0}
+Status: DEADLINE_EXCEEDED Deadline exceeded after 0.301s,name resolution: 0.001s,LB pick: 0.001s,remote_addr=127.0.0.1:34155
+Headers: {"content-type":"application/grpc+proto","date":"Tue, 27 Oct 2026 08:29:24 GMT"}
+Trailers: {}
+Messages (16):
+  {"pair":"USDCHF","bid":"0.88100","ask":"0.88120","seq":27,"time":{"seconds":1793089764,"nanos":351000000}}
+  {"pair":"USDCHF","bid":"0.88108","ask":"0.88118","seq":28,"time":{"seconds":1793089764,"nanos":371000000}}
+  {"pair":"USDCHF","bid":"0.88094","ask":"0.88124","seq":29,"time":{"seconds":1793089764,"nanos":391000000}}
+  {"pair":"USDCHF","bid":"0.88105","ask":"0.88118","seq":30,"time":{"seconds":1793089764,"nanos":411000000}}
+  {"pair":"USDCHF","bid":"0.88100","ask":"0.88124","seq":31,"time":{"seconds":1793089764,"nanos":432000000}}
+  {"pair":"USDCHF","bid":"0.88106","ask":"0.88117","seq":32,"time":{"seconds":1793089764,"nanos":451000000}}
+  {"pair":"USDCHF","bid":"0.88102","ask":"0.88126","seq":33,"time":{"seconds":1793089764,"nanos":472000000}}
+  {"pair":"USDCHF","bid":"0.88101","ask":"0.88121","seq":34,"time":{"seconds":1793089764,"nanos":493000000}}
+  {"pair":"USDCHF","bid":"0.88097","ask":"0.88124","seq":35,"time":{"seconds":1793089764,"nanos":513000000}}
+  {"pair":"USDCHF","bid":"0.88102","ask":"0.88122","seq":36,"time":{"seconds":1793089764,"nanos":534000000}}
+  {"pair":"USDCHF","bid":"0.88096","ask":"0.88123","seq":37,"time":{"seconds":1793089764,"nanos":553000000}}
+  {"pair":"USDCHF","bid":"0.88105","ask":"0.88119","seq":38,"time":{"seconds":1793089764,"nanos":574000000}}
+  {"pair":"USDCHF","bid":"0.88106","ask":"0.88122","seq":39,"time":{"seconds":1793089764,"nanos":593000000}}
+  {"pair":"USDCHF","bid":"0.88102","ask":"0.88128","seq":40,"time":{"seconds":1793089764,"nanos":614000000}}
+  {"pair":"USDCHF","bid":"0.88105","ask":"0.88133","seq":41,"time":{"seconds":1793089764,"nanos":633000000}}
+  {"pair":"USDCHF","bid":"0.88111","ask":"0.88131","seq":42,"time":{"seconds":1793089764,"nanos":654000000}}
