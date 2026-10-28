@@ -1,0 +1,7 @@
+GetQuote  (2 ms)
+Call options: {"token":"(none)"}
+Request: {"pair":"EURUSD","delay_ms":0}
+Status: UNAUTHENTICATED missing or invalid bearer token
+Headers: {}
+Trailers: {"content-type":"application/grpc+proto","date":"Wed, 28 Oct 2026 09:07:40 GMT"}
+Messages (0):

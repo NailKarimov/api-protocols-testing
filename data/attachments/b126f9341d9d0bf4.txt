@@ -1,0 +1,3 @@
+ws://127.0.0.1:44497/ws  (Authorization: Bearer ***)
+09:07:44.758 open (subprotocol quotes.v1)
+09:07:44.758 close 1001 server shutting down

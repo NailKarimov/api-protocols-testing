@@ -1,7 +1,0 @@
-SubmitOrders  (5 ms)
-Call options: {"token":"(none)"}
-Request: {"orders":1,"first":[{"client_order_id":"x","pair":"EURUSD","side":"SIDE_BUY","amount":"1000.00"}]}
-Status: UNAUTHENTICATED missing or invalid bearer token
-Headers: {}
-Trailers: {"content-type":"application/grpc+proto","date":"Tue, 27 Oct 2026 08:29:24 GMT"}
-Messages (0):
