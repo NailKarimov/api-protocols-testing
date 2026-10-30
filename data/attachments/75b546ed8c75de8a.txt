@@ -1,0 +1,3 @@
+ws://127.0.0.1:40707/ws  (Authorization: Bearer ***)
+09:16:34.037 open (subprotocol none)
+09:16:34.038 close 1002 subprotocol quotes.v1 required

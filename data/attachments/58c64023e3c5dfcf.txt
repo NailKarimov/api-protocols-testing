@@ -1,0 +1,7 @@
+Subscribe  (2 ms)
+Call options: {"token":"***"}
+Request: {"pairs":["EURUSD","ABCDEF"],"max_updates":5}
+Status: NOT_FOUND unknown pair ABCDEF
+Headers: {"content-type":"application/grpc+proto","date":"Fri, 30 Oct 2026 09:16:31 GMT"}
+Trailers: {}
+Messages (0):
