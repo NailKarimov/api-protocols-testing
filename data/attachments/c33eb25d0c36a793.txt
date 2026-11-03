@@ -1,0 +1,9 @@
+ws://127.0.0.1:37601/ws  (Authorization: Bearer ***)
+10:18:06.850 open (subprotocol quotes.v1)
+10:18:07.047 ← ping
+10:18:07.150 → {"type":"subscribe","pairs":["EURUSD"],"since":{"EURUSD":1}}
+10:18:07.150 ← {"type":"subscribed","pairs":["EURUSD"]}
+10:18:07.150 ← {"type":"reset","pair":"EURUSD"}
+10:18:07.150 ← {"type":"quote","pair":"EURUSD","bid":"1.08485","ask":"1.08509","seq":16,"time":"2026-11-03T10:18:07.137Z"}
+10:18:07.159 ← {"type":"quote","pair":"EURUSD","bid":"1.08486","ask":"1.08501","seq":17,"time":"2026-11-03T10:18:07.159Z"}
+10:18:07.163 close 1000 bye

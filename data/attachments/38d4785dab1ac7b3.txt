@@ -1,7 +1,0 @@
-Subscribe  (2 ms)
-Call options: {"token":"***"}
-Request: {"pairs":["EURUSD","EURUSD"],"max_updates":5}
-Status: INVALID_ARGUMENT pairs must be distinct
-Headers: {"content-type":"application/grpc+proto","date":"Mon, 02 Nov 2026 10:17:07 GMT"}
-Trailers: {}
-Messages (0):
