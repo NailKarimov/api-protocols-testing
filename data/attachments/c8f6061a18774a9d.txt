@@ -1,7 +1,0 @@
-GetQuote  (5 ms)
-Call options: {"token":"***"}
-Request: {"pair":"EUR","delay_ms":0}
-Status: INVALID_ARGUMENT pair must be six upper-case letters such as "EURUSD"
-Headers: {"content-type":"application/grpc+proto","date":"Tue, 03 Nov 2026 10:18:02 GMT"}
-Trailers: {}
-Messages (0):
