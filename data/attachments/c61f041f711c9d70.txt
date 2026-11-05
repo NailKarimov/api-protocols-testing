@@ -1,0 +1,13 @@
+ws://127.0.0.1:33649/ws  (Authorization: Bearer ***)
+10:03:00.910 open (subprotocol quotes.v1)
+10:03:00.910 → {oops
+10:03:00.910 → {oops
+10:03:00.910 → {oops
+10:03:00.910 → {oops
+10:03:00.910 → {oops
+10:03:00.911 ← {"type":"error","code":"bad_json","message":"the message is not JSON"}
+10:03:00.911 ← {"type":"error","code":"bad_json","message":"the message is not JSON"}
+10:03:00.911 ← {"type":"error","code":"bad_json","message":"the message is not JSON"}
+10:03:00.911 ← {"type":"error","code":"bad_json","message":"the message is not JSON"}
+10:03:00.911 ← {"type":"error","code":"bad_json","message":"the message is not JSON"}
+10:03:00.911 close 1008 too many bad messages
