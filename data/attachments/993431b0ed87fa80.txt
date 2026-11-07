@@ -1,6 +1,0 @@
-ws://127.0.0.1:45997/ws  (Authorization: Bearer ***)
-10:06:46.729 open (subprotocol quotes.v1)
-10:06:46.729 → {"type":"ping","id":7}
-10:06:46.730 ← {"type":"pong","id":7}
-10:06:46.778 ← ping
-10:06:46.780 close 1000 bye
