@@ -1,8 +1,0 @@
-ws://127.0.0.1:46585/ws  (Authorization: Bearer ***)
-09:42:41.798 open (subprotocol quotes.v1)
-09:42:41.798 → {"type":"subscribe","pairs":["ABCDEF"]}
-09:42:41.798 → {"type":"ping","id":1}
-09:42:41.798 ← {"type":"error","code":"unknown_pair","message":"unknown pair ABCDEF"}
-09:42:41.798 ← {"type":"pong","id":1}
-09:42:41.981 ← ping
-09:42:41.983 close 1000 bye
