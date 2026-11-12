@@ -1,0 +1,16 @@
+http://127.0.0.1:39369/sse  (Authorization: Bearer ***)
+03:04:30.750 GET /sse?pairs=EURUSD,USDJPY
+03:04:30.753 200 text/event-stream; charset=utf-8
+03:04:30.753 event quote id=EURUSD=18,USDJPY=0 {"type":"quote","pair":"EURUSD","bid":"1.08480","ask":"1.08507","seq":18,"time":"2026-11-12T03:04:30.751Z"}
+03:04:30.753 event quote id=EURUSD=18,USDJPY=18 {"type":"quote","pair":"USDJPY","bid":"151.169","ask":"151.197","seq":18,"time":"2026-11-12T03:04:30.751Z"}
+03:04:30.772 event quote id=EURUSD=19,USDJPY=18 {"type":"quote","pair":"EURUSD","bid":"1.08479","ask":"1.08509","seq":19,"time":"2026-11-12T03:04:30.771Z"}
+03:04:30.772 event quote id=EURUSD=19,USDJPY=19 {"type":"quote","pair":"USDJPY","bid":"151.179","ask":"151.192","seq":19,"time":"2026-11-12T03:04:30.771Z"}
+03:04:30.792 event quote id=EURUSD=20,USDJPY=19 {"type":"quote","pair":"EURUSD","bid":"1.08487","ask":"1.08505","seq":20,"time":"2026-11-12T03:04:30.792Z"}
+03:04:30.792 event quote id=EURUSD=20,USDJPY=20 {"type":"quote","pair":"USDJPY","bid":"151.172","ask":"151.202","seq":20,"time":"2026-11-12T03:04:30.792Z"}
+03:04:30.813 event quote id=EURUSD=21,USDJPY=20 {"type":"quote","pair":"EURUSD","bid":"1.08487","ask":"1.08502","seq":21,"time":"2026-11-12T03:04:30.812Z"}
+03:04:30.813 event quote id=EURUSD=21,USDJPY=21 {"type":"quote","pair":"USDJPY","bid":"151.169","ask":"151.199","seq":21,"time":"2026-11-12T03:04:30.812Z"}
+03:04:30.833 event quote id=EURUSD=22,USDJPY=21 {"type":"quote","pair":"EURUSD","bid":"1.08482","ask":"1.08503","seq":22,"time":"2026-11-12T03:04:30.833Z"}
+03:04:30.833 event quote id=EURUSD=22,USDJPY=22 {"type":"quote","pair":"USDJPY","bid":"151.178","ask":"151.193","seq":22,"time":"2026-11-12T03:04:30.833Z"}
+03:04:30.833 (client closes the stream)
+03:04:30.835 stream ended
+03:04:30.835 (client closes the stream)
