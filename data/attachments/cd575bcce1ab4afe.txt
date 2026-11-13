@@ -1,0 +1,5 @@
+http://127.0.0.1:45731/sse  (Authorization: Bearer ***)
+03:04:21.359 GET /sse?pairs=
+03:04:21.361 400 application/json
+03:04:21.361 {"code":"bad_pairs","message":"pairs must list 1 … 10 pairs"}
+03:04:21.362 (client closes the stream)
