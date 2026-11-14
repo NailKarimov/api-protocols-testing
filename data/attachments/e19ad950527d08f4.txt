@@ -1,0 +1,8 @@
+ws://127.0.0.1:37845/ws  (Authorization: Bearer ***)
+03:04:18.358 open (subprotocol quotes.v1)
+03:04:18.358 → {oops
+03:04:18.358 → {"type":"ping","id":1}
+03:04:18.358 ← {"type":"error","code":"bad_json","message":"the message is not JSON"}
+03:04:18.358 ← {"type":"pong","id":1}
+03:04:18.542 ← ping
+03:04:18.546 close 1000 bye

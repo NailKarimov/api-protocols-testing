@@ -1,0 +1,8 @@
+GetQuote  (1 ms)
+Call options: {"token":"***"}
+Request: {"pair":"GBPUSD","delay_ms":0}
+Status: OK OK
+Headers: {"content-type":"application/grpc+proto","date":"Sat, 14 Nov 2026 03:04:15 GMT"}
+Trailers: {}
+Messages (1):
+  {"quote":{"pair":"GBPUSD","bid":"1.26993","ask":"1.27018","seq":54,"time":{"seconds":1794625455,"nanos":540000000}}}
