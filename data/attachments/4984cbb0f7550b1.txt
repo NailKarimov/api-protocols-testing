@@ -1,0 +1,6 @@
+ws://127.0.0.1:39103/ws  (Authorization: Bearer ***)
+03:04:02.500 open (subprotocol quotes.v1)
+03:04:02.500 → {"type":"ping","id":7}
+03:04:02.500 ← {"type":"pong","id":7}
+03:04:02.576 ← ping
+03:04:02.578 close 1000 bye
