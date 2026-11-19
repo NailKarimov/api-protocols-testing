@@ -1,0 +1,13 @@
+ws://127.0.0.1:38359/ws  (Authorization: Bearer ***)
+03:03:57.118 open (subprotocol quotes.v1)
+03:03:57.118 → {oops
+03:03:57.118 → {oops
+03:03:57.118 → {oops
+03:03:57.118 → {oops
+03:03:57.118 → {oops
+03:03:57.118 ← {"type":"error","code":"bad_json","message":"the message is not JSON"}
+03:03:57.118 ← {"type":"error","code":"bad_json","message":"the message is not JSON"}
+03:03:57.118 ← {"type":"error","code":"bad_json","message":"the message is not JSON"}
+03:03:57.118 ← {"type":"error","code":"bad_json","message":"the message is not JSON"}
+03:03:57.118 ← {"type":"error","code":"bad_json","message":"the message is not JSON"}
+03:03:57.119 close 1008 too many bad messages
