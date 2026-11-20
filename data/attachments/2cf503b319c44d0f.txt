@@ -1,0 +1,12 @@
+ws://127.0.0.1:40851/ws  (Authorization: Bearer ***)
+03:04:28.834 open (subprotocol quotes.v1)
+03:04:28.834 → {"type":"subscribe","pairs":["EURUSD"]}
+03:04:28.834 ← {"type":"subscribed","pairs":["EURUSD"]}
+03:04:28.834 ← {"type":"quote","pair":"EURUSD","bid":"1.08536","ask":"1.08558","seq":143,"time":"2026-11-20T03:04:28.833Z"}
+03:04:28.853 ← {"type":"quote","pair":"EURUSD","bid":"1.08542","ask":"1.08556","seq":144,"time":"2026-11-20T03:04:28.853Z"}
+03:04:28.873 ← {"type":"quote","pair":"EURUSD","bid":"1.08533","ask":"1.08556","seq":145,"time":"2026-11-20T03:04:28.872Z"}
+03:04:28.894 ← {"type":"quote","pair":"EURUSD","bid":"1.08526","ask":"1.08555","seq":146,"time":"2026-11-20T03:04:28.894Z"}
+03:04:28.914 ← {"type":"quote","pair":"EURUSD","bid":"1.08527","ask":"1.08552","seq":147,"time":"2026-11-20T03:04:28.914Z"}
+03:04:28.923 ← ping
+03:04:28.923 (drop: socket destroyed without a close frame)
+03:04:28.923 close 1006 
