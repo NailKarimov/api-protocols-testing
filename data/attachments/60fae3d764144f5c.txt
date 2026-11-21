@@ -1,5 +1,0 @@
-http://127.0.0.1:40551/sse  (Authorization: Bearer ***)
-03:04:27.154 GET /sse?pairs=EURUSD  Last-Event-ID: yesterday
-03:04:27.156 400 application/json
-03:04:27.156 {"code":"bad_cursor","message":"Last-Event-ID is not a cursor of this stream"}
-03:04:27.157 (client closes the stream)
