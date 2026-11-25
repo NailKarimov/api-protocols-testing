@@ -1,8 +1,0 @@
-GetQuote  (6 ms)
-Call options: {"token":"***"}
-Request: {"pair":"EURUSD","delay_ms":0}
-Status: OK OK
-Headers: {"content-type":"application/grpc+proto","date":"Tue, 24 Nov 2026 03:04:12 GMT"}
-Trailers: {}
-Messages (1):
-  {"quote":{"pair":"EURUSD","bid":"1.08491","ask":"1.08501","seq":48,"time":{"seconds":1795489452,"nanos":346000000}}}
