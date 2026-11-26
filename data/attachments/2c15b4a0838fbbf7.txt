@@ -1,0 +1,12 @@
+ws://127.0.0.1:43497/ws  (Authorization: Bearer ***)
+03:04:08.823 open (subprotocol quotes.v1)
+03:04:08.823 → {"type":"subscribe","pairs":["EURUSD"]}
+03:04:08.824 ← {"type":"subscribed","pairs":["EURUSD"]}
+03:04:08.824 ← {"type":"quote","pair":"EURUSD","bid":"1.08532","ask":"1.08544","seq":117,"time":"2026-11-26T03:04:08.822Z"}
+03:04:08.842 ← {"type":"quote","pair":"EURUSD","bid":"1.08526","ask":"1.08555","seq":118,"time":"2026-11-26T03:04:08.842Z"}
+03:04:08.863 ← {"type":"quote","pair":"EURUSD","bid":"1.08528","ask":"1.08546","seq":119,"time":"2026-11-26T03:04:08.862Z"}
+03:04:08.883 ← {"type":"quote","pair":"EURUSD","bid":"1.08523","ask":"1.08548","seq":120,"time":"2026-11-26T03:04:08.883Z"}
+03:04:08.903 ← {"type":"quote","pair":"EURUSD","bid":"1.08531","ask":"1.08543","seq":121,"time":"2026-11-26T03:04:08.903Z"}
+03:04:08.923 ← {"type":"quote","pair":"EURUSD","bid":"1.08525","ask":"1.08548","seq":122,"time":"2026-11-26T03:04:08.923Z"}
+03:04:08.923 (drop: socket destroyed without a close frame)
+03:04:08.924 close 1006 
