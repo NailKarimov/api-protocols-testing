@@ -1,5 +1,0 @@
-http://127.0.0.1:43497/sse  (Authorization: Bearer ***)
-03:04:07.677 GET /sse?pairs=EURUSD
-03:04:07.679 401 application/json
-03:04:07.679 {"code":"unauthorized","message":"a Bearer token is required"}
-03:04:07.680 (client closes the stream)
